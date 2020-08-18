@@ -1,0 +1,147 @@
+﻿@page "/Results/Overall/{EventId:int}/{SeasonYear:int}/{EventName}"
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+@using mdijk.blazoring.Client.Shared.Components.Laptimes
+@inject EventResultClient EventResultClient
+@inject NavigationManager NavMan
+
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            Results for the @SeasonYear @EventName
+        </PortletHead>
+        <PortletBody>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Driver</th>
+                        <th>Team</th>
+                        <th>Qualified</th>
+                        <th>Laps</th>
+                        <th>Total race time</th>
+                        <th>Status</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading)
+                    {
+                        <LoadingColumns ColumnCount="8" />
+                    }
+                    else
+                    {
+                        if (!results.Any())
+                        {
+                            <tr>
+                                <td colspan="4">
+                                    Either the event has not been completed yet, or no results have been entered.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var row in results)
+                            {
+                                <tr>
+                                    <td>@row.FinishingPosition</td>
+                                    <td>
+                                        <a href="@CreateNavLink(row.DriverEntry.Driver)">
+                                            @DriverFormatter.Format(row.DriverEntry.Driver)
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@CreateNavLink(row.DriverEntry.EntryTeam)">
+                                            @row.DriverEntry.EntryTeam.TeamName
+                                        </a>
+                                    </td>
+                                    <td>@row.TypedMetaData.GridPosition</td>
+                                    <td>@row.TypedMetaData.Laps</td>
+                                    <td>@row.TypedMetaData.Time</td>
+                                    <td>@row.TypedMetaData.Status</td>
+                                    <td>@row.TypedMetaData.Points</td>
+                                </tr>
+                            }
+                        }
+
+                    }
+                </tbody>
+                @if (!loading)
+                {
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">
+                                @if (!results.Any())
+                                {
+                                    <a href="/Results/AddResults/@EventId/@SeasonYear/@EventName" class="nav-link">Add Results</a>
+                                }
+                                else
+                                {
+                                    <a href="/Results/EditResults/@EventId/@SeasonYear/@EventName" class="nav-link">Edit Results</a>
+                                }
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </PortletBody>
+    </Portlet>
+</div>
+<div class="row">
+    <DriverPositions EventId="@EventId"/>
+</div>
+@code
+{
+    [Parameter]
+    public int EventId { get; set; }
+
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    [Parameter]
+    public string EventName { get; set; }
+
+    private bool loading = true;
+
+    private ICollection<EventResult> results;
+
+    private string CreateNavLink(Team team)
+    {
+        return $"Teams/Details/{team.TeamId}/{team.TeamName}";
+    }
+
+    private string DisplayTeam(DriverEntry driverEntry)
+    {
+        return $"{driverEntry.EntryFullEntryName}";
+    }
+
+    private string DisplayPoints(int finishingPosition, bool fastedLap)
+    {
+        if (mdijk.blazoring.Shared.Points.PointsForPosition.ContainsKey(finishingPosition))
+        {
+            var points = mdijk.blazoring.Shared.Points.PointsForPosition[finishingPosition];
+            if (fastedLap)
+            {
+                points += mdijk.blazoring.Shared.Points.FastedLap;
+            }
+
+            return $"{points}";
+        }
+
+        return "0";
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        results = await EventResultClient.GetResultsForEventAsync(EventId, EventName);
+        loading = false;
+    }
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+}

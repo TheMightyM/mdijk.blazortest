@@ -1,0 +1,183 @@
+﻿@page "/Results/AddResults/{EventId:int}/{SeasonYear:int}/{EventName}"
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Submit
+@using mdijk.blazoring.Shared.Response
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+@inject SeasonClient SeasonClient
+@inject EventResultClient EventResultClient
+@inject NavigationManager NavigationManager
+
+<Portlet>
+    <PortletHead>
+        Define the @SeasonYear @EventName results
+    </PortletHead>
+
+    <PortletBody>
+        @if (loading)
+        {
+            <table>
+                <LoadingThreeColumns />
+            </table>
+        }
+        else
+        {
+            <EditForm model="@resultsModel" OnValidSubmit="HandleSubmit">
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Driver</th>
+                            <th>Team</th>
+                            <th>Qualified</th>
+                            <th>Laps</th>
+                            <th>Total race time</th>
+                            <th>Status</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var model in resultsModel)
+                        {
+                            <tr>
+                                <td>@model.FinishingPosition</td>
+                                <td>
+                                    <select @onchange="@(e => OnSelectedDriverChanged(e, model))">
+                                        @((MarkupString)driverSelectOptions)
+                                    </select>
+                                </td>
+                                <td>@model.EntryName</td>
+                                <td><InputText @bind-Value="@model.GridPosition"/></td>
+                                <td><InputText @bind-Value="@model.Laps"/></td>
+                                <td><InputText @bind-Value="@model.Time" /></td>
+                                <td><InputText @bind-Value="@model.Status" /></td>
+                                <td><InputText @bind-Value="@model.Points" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">
+                                <div class="form-group row">
+                                    <div class="col-sm-10">
+                                        <button type="submit" class="btn btn-primary @buttonExtraClass">Submit Results</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </EditForm>
+
+        }
+    </PortletBody>
+</Portlet>
+
+@code{
+    [Parameter]
+    public int EventId { get; set; }
+
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    [Parameter]
+    public string EventName { get; set; }
+
+    private bool loading = true;
+
+    private ICollection<Entry> entries;
+    private IList<AddEventResultModelRow> resultsModel;
+    private IDictionary<int, string> driverEntryTeamNameMap;
+    private string driverSelectOptions;
+
+    // de standaard submit meuk!
+    private bool pressed = false;
+    private string buttonExtraClass = "";
+    public string error = "";
+    private string spinnerclass = "kt-spinner kt-spinner--right kt-spinner--md kt-spinner--light";
+
+    protected override async Task OnInitializedAsync()
+    {
+        entries = await SeasonClient.GetEntriesForEventAsync(EventId);
+
+        loading = false;
+        // scan entries for drivers
+        SetDriverSelectOptionsAndEntryCount();
+        // return;
+    }
+
+    private void SetDriverSelectOptionsAndEntryCount()
+    {
+        resultsModel = new List<AddEventResultModelRow>();
+        driverEntryTeamNameMap = new Dictionary<int, string>
+    {
+            { 0, "" }
+        };
+        var builder = new System.Text.StringBuilder();
+        builder.AppendLine("<option value='0'/>");
+        int counter = 1;
+
+        var combo = entries.SelectMany(entry => entry.Drivers, (entry, driverEntry) =>
+        new
+        {
+            EntryName = entry.FullEntryName,
+            Driver = driverEntry
+        }).OrderBy(x => x.Driver.Driver.LastName);
+
+        //foreach (var driver in entries.SelectMany(x => x.Drivers).OrderBy(x => x.Driver.LastName))
+        foreach(var driver in combo)
+        {                                                                             // i heard you like a driver, 
+                                                                           // so i put a driver in your driver for when you driver.
+            builder.AppendLine($"<option value='{driver.Driver.DriverEntryId}'>{DriverFormatter.Format(driver.Driver.Driver)}</option>");
+            resultsModel.Add(new AddEventResultModelRow
+            {
+                FinishingPosition = counter++
+            });
+
+            driverEntryTeamNameMap.Add(driver.Driver.DriverEntryId, driver.EntryName);
+        }
+
+        driverSelectOptions = builder.ToString();
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        if (pressed) return;
+        var builder = new System.Text.StringBuilder();
+        pressed = true;
+        buttonExtraClass = spinnerclass;
+
+        var submitModel = new AddEventResultModel
+        {
+            EventId = EventId,
+            Rows = resultsModel
+        };
+
+        var rObj = await EventResultClient.AddCompleteResultAsync(submitModel);
+
+        if (rObj.IsError)
+        {
+            builder.AppendLine(rObj.Message);
+        }
+
+        error = builder.ToString();
+
+        buttonExtraClass = "";
+        pressed = false;
+
+        if (string.IsNullOrEmpty(error))
+        {
+            NavigationManager.NavigateTo($"Results/Overall/{EventId}/{SeasonYear}/{EventName}");
+        }
+    }
+
+
+    private Task OnSelectedDriverChanged(ChangeEventArgs e, AddEventResultModelRow model)
+    {
+        model.DriverEntryId = e.Value.ToString();
+        model.EntryName = driverEntryTeamNameMap[Convert.ToInt32(e.Value)];
+        return Task.FromResult(true);
+    }
+}

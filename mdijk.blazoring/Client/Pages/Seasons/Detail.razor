@@ -1,0 +1,116 @@
+﻿@page "/Seasons/Detail/{SeasonId:int}/{SeasonYear:int}"
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+@using mdijk.blazoring.Client.Shared.Components.Results
+@inject SeasonClient SeasonClient
+
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            Season @SeasonYear - Season Overview
+        </PortletHead>
+        <PortletBody>
+            <Calendar SeasonId="@SeasonId" SeasonYear="@SeasonYear" />
+        </PortletBody>
+    </Portlet>
+</div>
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            Season @SeasonYear - Entrants
+        </PortletHead>
+        <PortletBody>
+
+            <table class="table table-striped">
+                <tr>
+                    <th>Entry</th>
+                    <th>Team</th>
+                    <th>Engine</th>
+                    <th colspan="2">Drivers</th>
+                </tr>
+                <tbody>
+                    @if (currentSeason == null)
+                    {
+                        <LoadingColumns ColumnCount="5" />
+                    }
+                    else
+                    {
+                        @foreach (var entry in currentSeason.Entries)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@CreateNavLink(entry.Team)">
+                                        @entry.FullEntryName
+                                    </a>
+                                </td>
+                                <td>@entry.Team.TeamName</td>
+                                <td>@entry.Engine?.EngineName</td>
+                                @foreach (var driver in entry.Drivers)
+                                {
+                                    <td>
+                                        <a href="@CreateNavLink(driver.Driver)">
+                                            @DriverFormatter.Format(driver.Driver)
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+
+            <a href="/Seasons/AddEntries/@SeasonId/@SeasonYear" class="nav-link">
+                Add Entries
+            </a>
+        </PortletBody>
+    </Portlet>
+</div>
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            Season @SeasonYear - Grafieken!
+        </PortletHead>
+        <PortletBody>
+            <SeasonTop10Finish SeasonId="@SeasonId" />
+        </PortletBody>
+    </Portlet>
+</div>
+
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            Season @SeasonYear - Grafieken!
+        </PortletHead>
+        <PortletBody>
+            <SeasonChartDougnutWinners SeasonId="@SeasonId" />
+        </PortletBody>
+    </Portlet>
+</div>
+
+@code
+{
+    [Parameter]
+    public int SeasonId { get; set; }
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    private Season currentSeason;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentSeason = await SeasonClient.GetSeasonAsync(SeasonId, SeasonYear);
+    }
+
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+
+    private string CreateNavLink(Team team)
+    {
+        return $"Teams/Details/{team.TeamId}/{team.TeamName}";
+    }
+}

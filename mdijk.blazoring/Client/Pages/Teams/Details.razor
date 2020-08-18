@@ -1,0 +1,77 @@
+﻿@page "/Teams/Details/{TeamId}/{TeamName}"
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Statistics
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@inject TeamClient TeamClient
+
+<div class="row">
+    <TeamStatisticsView TeamId="@TeamId" TeamName="@TeamName" />
+</div>
+
+<div class="row">
+    <Portlet>
+        <PortletHead>Season results</PortletHead>
+        <PortletBody>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Driver</th>
+                        @if (!MaxRaces.HasValue)
+                        {
+                            <th>  <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" /></th>
+                        }
+                        else
+                        {
+                            for (int i = 0; i < MaxRaces.Value; i++)
+                            {
+                                <th>@(i+1)</th>
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (SeasonsParticipated == null)
+                    {
+                        <tr>
+                            <td>
+                                <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" />
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var season in SeasonsParticipated.OrderByDescending(x => x.SeasonYear))
+                        {
+                            var guid = Guid.NewGuid();
+                            <SeasonResultRow TeamId="@TeamId"
+                                             SeasonId="@season.SeasonId"
+                                             SeasonYear="@season.SeasonYear"
+                                             NumberOfDrivers="@season.NumberOfDrivers"
+                                             guid="@guid" />
+                        }
+                    }
+                </tbody>
+            </table>
+        </PortletBody>
+    </Portlet>
+</div>
+
+@code {
+
+    [Parameter]
+    public string TeamId { get; set; }
+
+    [Parameter]
+    public string TeamName { get; set; }
+
+    private int? MaxRaces = null;
+    private ICollection<TeamSeasonParticipation> SeasonsParticipated = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        MaxRaces = await TeamClient.GetMaxRacesInSeasonForTeamAsync(Convert.ToInt32(TeamId));
+        SeasonsParticipated = await TeamClient.GetParticipationAsync(Convert.ToInt32(TeamId));
+    }
+}

@@ -1,0 +1,44 @@
+﻿@page "/standings"
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@using mdijk.blazoring.Shared;
+
+@using mdijk.blazoring.Client.Shared.Components.Results
+@inject SeasonClient SeasonClient
+
+<div class="row">
+    <div class="col-xl-6">
+        @if (loading)
+        {
+            <LoadingPortlet />
+        }
+        else
+        {
+            <DriverSeasonResults SeasonResults="@seasonResults" />
+        }
+    </div>
+    <div class="col-xl-6">
+        @if (loading)
+        {
+            <LoadingPortlet />
+        }
+        else
+        {
+            <TeamSeasonResults SeasonResults="@seasonResults" />
+        }
+    </div>
+</div>
+
+@code
+{
+    private bool loading = true;
+
+    private SeasonResultsModel seasonResults;
+
+    protected override async Task OnInitializedAsync()
+    {
+        seasonResults = await SeasonClient.CurrentSeasonResultsAsync();
+        loading = false;
+    }
+}

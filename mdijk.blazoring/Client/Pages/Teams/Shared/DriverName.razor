@@ -1,0 +1,40 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Client.Services
+@using mdijk.blazoring.Shared
+@inject DriverNameServer driverNameServer
+
+@if (Driver == null)
+{
+    <span>[[@DriverId]]</span>
+}
+else
+{
+    <a href="@CreateNavLink(Driver)">
+        @DriverFormatter.Format(Driver, guid)
+    </a>
+}
+
+@code {
+    [Parameter]
+    public int DriverId { get; set; }
+
+    public Driver Driver { get; set; }
+
+    [Parameter]
+    public Guid guid { get; set; }
+
+    public DriverName()
+    {
+        Console.WriteLine("Constructor");
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        Driver = await driverNameServer.GetDriverInfo(DriverId);
+    }
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+}

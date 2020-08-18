@@ -1,0 +1,59 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.ML
+@using mdijk.blazoring.Client.ViewModels.ML.Exp
+@using mdijk.blazoring.Client.StateMachine.MLEXP
+
+@inject SeasonClient SeasonClient
+
+@if (Seasons == null || !Seasons.Any())
+{
+    <div>loading seasons...</div>
+}
+else
+{
+    bool keepGoing = true;
+    int counter = 0;
+    while (keepGoing)
+    {
+        var printSeasons = Seasons.Skip(counter * 6).Take(6);
+
+        <div class="row">
+            @foreach (var s in printSeasons)
+            {
+                <div class="col-2">
+                    <a @onclick="@( () => SelectSeason(s.SeasonId, s.SeasonYear) )">@s.SeasonYear</a>
+                </div>
+            }
+        </div>
+
+        counter++;
+        if (!printSeasons.Any())
+        {
+            keepGoing = false;
+        }
+    }
+}
+
+@code {
+    [Parameter]
+    public MLStateMachine StateMachine { get; set; }
+
+    [Parameter]
+    public EventCallback<MLStateMachine> StateMachineChanged { get; set; }
+
+
+    private ICollection<Season> Seasons { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var _seasons = await SeasonClient.GetAllSeasonsAsync();
+        Seasons = _seasons.Where(x => x.SeasonYear > 1995).ToList();
+    }
+
+    private async Task SelectSeason(int seasonId, int seasonYear)
+    {
+        StateMachine.SelectedSeason = new Season { SeasonId = seasonId, SeasonYear = seasonYear };
+        StateMachine.NextState();
+        await StateMachineChanged.InvokeAsync(StateMachine);
+    }
+}

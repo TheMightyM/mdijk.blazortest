@@ -1,0 +1,45 @@
+﻿@page "/ML/RacePrediction"
+
+@using mdijk.blazoring.Client.Pages.ML.Components
+@using mdijk.blazoring.Client.StateMachine.MLEXP 
+
+<div class="row">
+    <Portlet>
+        <PortletHead>Race prediction tryer!</PortletHead>
+        <PortletBody>
+            @if (StateMachine.CurrentState ==MLStateMachine.MachineStates.SelectSeason)
+            {
+                <SeasonSelector @bind-StateMachine="StateMachine" />
+            }
+
+            @if (StateMachine.CurrentState == MLStateMachine.MachineStates.SelectRace)
+            {
+                <RaceEventSelector @bind-StateMachine="StateMachine" />
+            }
+
+            @if (StateMachine.CurrentState == MLStateMachine.MachineStates.SelectDrivers)
+            {
+                <DriverSelection @bind-StateMachine="StateMachine" />
+            }
+            
+            @if(StateMachine.CurrentState == MLStateMachine.MachineStates.ShowResults)
+            {
+                <PredictionResponse @bind-StateMachine="StateMachine"/>
+            }
+        </PortletBody>
+    </Portlet>
+</div>
+
+@code{
+  
+    private MLStateMachine StateMachine { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.FromResult(true);
+        StateMachine = new MLStateMachine
+        {
+            CurrentState = MLStateMachine.MachineStates.SelectSeason
+        };
+    }
+}

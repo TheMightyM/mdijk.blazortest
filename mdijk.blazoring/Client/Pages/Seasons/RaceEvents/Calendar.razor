@@ -1,0 +1,74 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Response
+@using mdijk.blazoring.Shared.Submit
+@inject SeasonClient SeasonClient
+
+@if (loading)
+{
+    <LoadingThreeColumns />
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Event</th>
+                <th>Circuit</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!raceEvents.Any())
+            {
+            <td colspan="3">No events! Maybe go and add some?</td>
+        }
+        else
+        {
+
+            @foreach (var rE in raceEvents)
+            {
+                <tr>
+                    <td>@rE.SequenceNumber</td>
+                    <td>@rE.RaceEventName</td>
+                    <td>
+                        <a href="circuits/details/@rE.Circuit.CircuitId/@rE.Circuit.CircuitName">
+                            @rE.Circuit.CircuitName
+                        </a>
+                    </td>
+                    <td><a href="/Results/Overall/@rE.RaceEventId/@SeasonYear/@rE.RaceEventName" class="nav-link">Results</a></td>
+                </tr>
+            }
+        }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <a href="/Seasons/RaceEvents/Add/@SeasonId/@SeasonYear" class="nav-link">
+                            Add Events
+                        </a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    }
+
+
+@code
+{
+
+    [Parameter]
+    public int SeasonId { get; set; }
+
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    private bool loading = true;
+    private ICollection<RaceEvent> raceEvents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        raceEvents = await SeasonClient.GetSeasonCalendarAsync(SeasonId, SeasonYear);
+        loading = false;
+    }
+}

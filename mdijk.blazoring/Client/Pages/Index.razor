@@ -1,0 +1,31 @@
+﻿@page "/"
+
+@using mdijk.blazoring.Client.Shared.Components.Dashboard;
+
+
+<div class="row">
+    <div class="col-xl-6">
+        <Top3Drivers />
+    </div>
+    <div class="col-xl-6">
+        <Top3Constructors />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-12">
+        <Top10Finish />
+    </div>
+</div>
+
+@code
+{
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.FromResult(true);
+    }
+
+}

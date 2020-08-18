@@ -1,0 +1,106 @@
+﻿@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Statistics
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@inject TeamClient TeamClient
+
+<Portlet>
+    <PortletHead>
+        @if (TeamStatistics == null)
+        {
+            <div>Loading information....</div>
+        }
+        else
+        {
+            <div>Information for @TeamStatistics.TeamName</div>
+        }
+    </PortletHead>
+    <PortletBody>
+        <div class="row">
+            <div class="col-3">
+                Total Races
+            </div>
+            <div class="col-3">
+                @if (TeamStatistics == null)
+                {
+                    <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" />
+                }
+                else
+                {
+                    @TeamStatistics.NumberOfRaces
+                }
+            </div>
+            <div class="col-3">
+                Total Points
+            </div>
+            <div class="col-3">
+                @if (TeamStatistics == null)
+                {
+                    <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" />
+                }
+                else
+                {
+                    @TeamStatistics.TotalPoints
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-3">
+                Number of Wins
+            </div>
+            <div class="col-3">
+                @if (TeamStatistics == null)
+                {
+                    <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" />
+                }
+                else
+                {
+                    @TeamStatistics.NumberOfWins
+                }
+            </div>
+            <div class="col-3">
+                Number of Podiums
+            </div>
+            <div class="col-3">
+                @if (TeamStatistics == null)
+                {
+                    <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" />
+                }
+                else
+                {
+                    @TeamStatistics.NumberOfPodiums
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-3">
+                Number of Polepositions
+            </div>
+            <div class="col-3">
+                @if (TeamStatistics == null)
+                {
+                    <div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" />
+                }
+                else
+                {
+                    @TeamStatistics.NumberOfPoles
+                }
+            </div>
+        </div>
+    </PortletBody>
+</Portlet>
+
+@code {
+    [Parameter]
+    public string TeamId { get; set; }
+
+    [Parameter]
+    public string TeamName { get; set; }
+
+    private TeamStatistics TeamStatistics = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TeamStatistics = await TeamClient.GetTeamStatisticsAsync(Convert.ToInt32(TeamId));
+    }
+}

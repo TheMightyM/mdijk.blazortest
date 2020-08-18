@@ -1,0 +1,88 @@
+﻿@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Statistics
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@inject TeamClient TeamClient 
+
+@if(SeasonStats != null)
+{
+    var driverId = SeasonStats.DriversIds.ElementAt(0);
+    <tr>
+        <td rowspan="@NumberOfDrivers">
+            <a href="/Seasons/Detail/@SeasonId/@SeasonYear">
+                @SeasonYear
+            </a>
+        </td>
+        <td>
+            <DriverName DriverId="@driverId" guid="@guid"/>
+        </td>
+        @foreach (var eR in SeasonStats.EventResults.OrderBy(x => x.EventSequenceNr))
+        {
+            if (eR.DriverResults.Any(x => x.DriverId == driverId))
+            {
+                <td>
+                    <a href="/Results/Overall/@eR.EventId/@SeasonYear/@eR.EventName">
+                        @DisplayResultValue(eR.DriverResults.First(x => x.DriverId == driverId))
+                    </a>
+                </td>
+            }
+            else
+            {
+                <td>&nbsp;</td>
+            }
+        }
+    </tr>
+    @for (int i = 1; i < NumberOfDrivers; i++)
+    {
+        var driverId2 = SeasonStats.DriversIds.ElementAt(i);
+        <tr>
+            <td>
+                <DriverName DriverId="@driverId2" guid="@guid"/>
+            </td>
+            @foreach (var eR in SeasonStats.EventResults.OrderBy(x => x.EventSequenceNr))
+            {
+                if (eR.DriverResults.Any(x => x.DriverId == driverId2))
+                {
+                    <td>
+                        <a href="/Results/Overall/@eR.EventId/@SeasonYear/@eR.EventName">
+                            @DisplayResultValue(eR.DriverResults.First(x => x.DriverId == driverId2))
+                        </a>
+                    </td>
+                }
+                else
+                {
+                    <td>&nbsp;</td>
+                }
+            }
+        </tr>
+    }
+}
+
+@code {
+    [Parameter]
+    public string TeamId { get; set; }
+    [Parameter]
+    public int SeasonId { get; set; }
+    [Parameter]
+    public int SeasonYear { get; set; }
+    [Parameter]
+    public int NumberOfDrivers { get; set; }
+    [Parameter]
+    public Guid guid { get; set; }
+
+    private TeamSeason SeasonStats = null;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        SeasonStats = await TeamClient.GetSeasonResultsAsync(Convert.ToInt32(TeamId), SeasonId);
+    }
+
+    private string DisplayResultValue(TeamSeasonEventDriverResult dr)
+    {
+        if (!dr.Started) return "DNQ";
+        if (!dr.Finished) return "DNF";
+        return $"{dr.FinishingPosition}";
+    }
+
+}

@@ -1,0 +1,35 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@using mdijk.blazoring.Shared;
+
+@using mdijk.blazoring.Client.Shared.Components.Results
+@inject SeasonClient SeasonClient
+
+@if (loading)
+{
+    <Portlet>
+        <PortletHead>Loading drivers top 3</PortletHead>
+        <PortletBody>
+            <table>
+                <LoadingThreeColumns />
+            </table>
+        </PortletBody>
+    </Portlet>
+}
+else
+{
+    <DriverSeasonResults SeasonResults="@seasonResults" Limit="3" />
+}
+
+@code {
+
+    private bool loading = true;
+    private SeasonResultsModel seasonResults;
+
+    protected override async Task OnInitializedAsync()
+    {
+        seasonResults = await SeasonClient.CurrentSeasonResultsAsync();
+        loading = false;
+    }
+}

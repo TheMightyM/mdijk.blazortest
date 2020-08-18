@@ -1,0 +1,259 @@
+﻿@page "/Seasons/AddEntries/{SeasonId:int}/{SeasonYear:int}"
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Response
+@using mdijk.blazoring.Shared.Submit
+@inject NavigationManager NavigationManager
+@inject SeasonClient SeasonClient
+@inject TeamClient TeamClient
+@inject DriverClient DriverClient
+@inject EngineClient EngineClient
+
+@if (errors != null && errors.Any())
+{
+    <Portlet>
+        <PortletHead>
+            Errors when creating the entries
+        </PortletHead>
+        <PortletBody>
+            <ul>
+                @foreach (var error in errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </PortletBody>
+    </Portlet>
+}
+
+<Portlet>
+    <PortletHead>
+        Add entries to the selected season
+    </PortletHead>
+    <PortletBody>
+        @if (!LoadingDone)
+        {
+            <div>loading! dit vervanger met een spinner ofzo</div>
+        }
+        else
+        {
+            <EditForm model="@entries" OnValidSubmit="HandleSubmit">
+                <table>
+                    <tr>
+                        <th>
+                            Entryname
+                        </th>
+                        <th>
+                            Team
+                        </th>
+                        <th>
+                            Engine
+                        </th>
+                        <th>
+                            Driver 1
+                        </th>
+                        <th>
+                            Driver 2
+                        </th>
+                    </tr>
+                    @foreach (var entry in entries)
+                    {
+                        <tr>
+                            <td><InputText @bind-Value="entry.FullEntryName" /></td>
+                            <td>
+                                <InputSelect @bind-Value="entry.TeamId">
+                                    <option></option>
+                                    @foreach (var team in Teams)
+                                            {
+                                        <option value="@team.TeamId">@team.TeamName</option>
+                                            }
+                                </InputSelect>
+                            </td>
+                            <td>
+                                <InputSelect @bind-Value="entry.EngineId">
+                                    <option></option>
+                                    @foreach (var engine in Engines)
+                                            {
+                                        <option value="@engine.EngineId">@engine.EngineName</option>
+                                            }
+                                </InputSelect>
+                            </td>
+                            <td>
+                                <InputSelect @bind-Value="entry.FirstDriverId">
+                                    <option></option>
+                                    @foreach (var driver in Drivers)
+                                            {
+                                        <option value="@driver.DriverId">@driver.FirstName @driver.LastName (@driver.DriverNumber) </option>
+                                            }
+                                </InputSelect>
+                            </td>
+                            <td>
+                                <InputSelect @bind-Value="entry.SecondDriverId">
+                                    <option></option>
+                                    @foreach (var driver in Drivers)
+                                            {
+                                        <option value="@driver.DriverId">@driver.FirstName @driver.LastName (@driver.DriverNumber) </option>
+                                            }
+                                </InputSelect>
+                            </td>
+                        </tr>
+                    }
+                </table>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary @buttonExtraClass">Submit entries</button>
+                    </div>
+                </div>
+            </EditForm>
+        }
+    </PortletBody>
+</Portlet>
+
+@code
+{
+
+    [Parameter]
+    public int SeasonId { get; set; }
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    //private bool pressed = false;
+    private string buttonExtraClass = "";
+    private List<string> errors;
+    //private string spinnerclass = "kt-spinner kt-spinner--right kt-spinner--md kt-spinner--light";
+
+    private IEnumerable<Team> Teams { get; set; }
+    private IEnumerable<Driver> Drivers { get; set; }
+    private IEnumerable<Engine> Engines { get; set; }
+    private AddEntryModel[] entries = null;
+
+    private bool LoadingDone = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var driversTask = DriverClient.GetAllDriversAsync();
+        var enginesTask = EngineClient.GetAllEnginesAsync();
+        var teamsTask = TeamClient.GetAllTeamsAsync();
+
+        await Task.WhenAll(new Task[] { driversTask, enginesTask, teamsTask });
+
+        Drivers = driversTask.Result.OrderBy(x => x.LastName);
+        Engines = enginesTask.Result.OrderBy(x => x.EngineName);
+        Teams = teamsTask.Result.OrderBy(x => x.TeamName);
+
+        entries = new AddEntryModel[Teams.Count()];
+        for (int i = 0; i < entries.Length; i++)
+        {
+            entries[i] = new AddEntryModel { EntryId = i, EngineId = "0", FirstDriverId = "0", SecondDriverId = "0", TeamId = "0" };
+        }
+
+        LoadingDone = true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        // controle!
+        // eerst, kijk of de teams kloppen, want een team kan maar 1 entry hebben
+
+        // checken op dubbele teamnamen:
+        // pak naam 1, en kijk of er iemand is die naam1 heeft, en niet ons ID
+
+        errors = new List<string>();
+
+        bool teamsUnique = AreTeamsUnique();
+        bool driversCorrect = AreDriversCorrect();
+
+        if (teamsUnique && driversCorrect)
+        {
+
+            foreach (var entry in entries)
+            {
+                if (string.IsNullOrEmpty(entry.TeamId) || entry.TeamId == "0") continue;
+                entry.SeasonId = SeasonId;
+                
+                var rObj = await SeasonClient.AddEntryAsync(entry);
+
+                if (rObj.IsError)
+                {
+                    errors.Add(rObj.Message);
+                }
+            }
+
+            if (!errors.Any())
+            {
+                NavigationManager.NavigateTo($"Seasons/Detail/{SeasonId}/{SeasonYear}");
+            }
+        }
+
+    }
+
+    private bool AreTeamsUnique()
+    {
+        var teamsErred = new Dictionary<string, bool>();
+        bool unique = true;
+        foreach (var entry in entries)
+        {
+            if (entry.TeamId == "0") continue;
+            if (entries.Any(x => x.TeamId == entry.TeamId && x.EntryId != entry.EntryId))
+            {
+                unique = false;
+                if (!teamsErred.ContainsKey(entry.TeamId))
+                {
+                    errors.Add($"Team with name [{Teams.First(x => x.TeamId.ToString() == entry.TeamId).TeamName}] has been used more then once.");
+                    teamsErred.Add(entry.TeamId, true);
+                }
+            }
+        }
+
+        return unique;
+    }
+
+    private bool AreDriversCorrect()
+    {
+        var drivesErred = new Dictionary<string, bool>();
+        bool unique = true;
+
+        // een rijder mag maar in één entry voorkomen
+        foreach (var entry in entries)
+        {
+            if (entry.FirstDriverId == "0" || entry.SecondDriverId == "0") continue;
+            // driver 1 checken
+            if (entries.Any(x => x.EntryId != entry.EntryId
+                 && (x.FirstDriverId == entry.FirstDriverId || x.SecondDriverId == entry.FirstDriverId))
+                )
+            {
+                unique = false;
+                if (!drivesErred.ContainsKey(entry.FirstDriverId))
+                {
+                    errors.Add($"Driver with drivernumber [{Drivers.First(x => x.DriverId.ToString() == entry.FirstDriverId).DriverNumber}] has been used more then once.");
+                    drivesErred.Add(entry.FirstDriverId, true);
+                }
+            }
+
+            // driver 2 checken
+            if (entries.Any(x => x.EntryId != entry.EntryId
+                && (x.FirstDriverId == entry.SecondDriverId || x.SecondDriverId == entry.SecondDriverId))
+               )
+            {
+                unique = false;
+                if (!drivesErred.ContainsKey(entry.SecondDriverId))
+                {
+                    errors.Add($"Driver with drivernumber [{Drivers.First(x => x.DriverId.ToString() == entry.SecondDriverId).DriverNumber}] has been used more then once.");
+                    drivesErred.Add(entry.SecondDriverId, true);
+                }
+            }
+
+            // controleren of voor deze entry niet 1 en 2 dezelfde zijn
+            if (entry.FirstDriverId == entry.SecondDriverId)
+            {
+                unique = false;
+                if (!drivesErred.ContainsKey(entry.FirstDriverId))
+                {
+                    errors.Add($"Driver with drivernumber [{Drivers.First(x => x.DriverId.ToString() == entry.FirstDriverId).DriverNumber}] has been used more then once.");
+                    drivesErred.Add(entry.FirstDriverId, true);
+                }
+            }
+        }
+
+        return unique;
+    }
+}

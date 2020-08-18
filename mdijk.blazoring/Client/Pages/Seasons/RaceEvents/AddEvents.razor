@@ -1,0 +1,173 @@
+﻿@page "/Seasons/RaceEvents/Add/{SeasonId:int}/{SeasonYear:int}"
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Response
+@using mdijk.blazoring.Shared.Submit
+@inject NavigationManager NavigationManager
+@inject CircuitClient CircuitClient
+@inject SeasonClient SeasonClient  
+
+@if (errors != null && errors.Any())
+{    
+    <div class="row">
+        <Portlet>
+            <PortletHead>
+                Errors when creating the entries
+            </PortletHead>
+            <PortletBody>
+                <ul>
+                    @foreach (var error in errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </PortletBody>
+        </Portlet>
+    </div>
+}
+
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            Events - Bulk add
+        </PortletHead>
+        <PortletBody>
+            @if (loading)
+            {
+                <LoadingThreeColumns />
+            }
+            else
+            {
+                @if (!selectionMade)
+                {
+                    <div>
+                        <label>How many events do you want to add?</label><br/>
+                        <input @onchange="onNumberChanged" placeholder="We have the best numbers!" />
+                    </div>
+                }
+                else
+                {
+                    <EditForm model="@raceEvents" OnValidSubmit="HandleSubmit">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td>#</td>
+                                    <td>Name</td>
+                                    <td>Circuit</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rE in raceEvents)
+                                {
+                                    <tr>
+                                        <td><InputText @bind-Value="rE.SequenceNr" /></td>
+                                        <td><InputText @bind-Value="rE.RaceEventName" /></td>
+                                        <td>
+
+                                            <InputSelect @bind-Value="rE.CircuitId">
+                                                <option />
+                                                @foreach (var circuit in circuits)
+                                                            {
+                                                    <option value="@circuit.CircuitId">@circuit.CircuitName (@circuit.Country)</option>
+                                                            }
+                                            </InputSelect>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3">
+                                        <button type="submit" class="btn btn-primary @buttonExtraClass">Submit entries</button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </EditForm>
+                }
+            }
+        </PortletBody>
+    </Portlet>
+</div>
+
+@code
+{
+    [Parameter]
+    public int SeasonId { get; set; }
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    private bool loading = true;
+    private ICollection<Circuit> circuits;
+    private bool selectionMade = false;
+    public int NumberToAdd { get; set; }
+
+    private bool pressed = false;
+    private string buttonExtraClass = "";
+    private List<string> errors;
+    private string spinnerclass = "kt-spinner kt-spinner--right kt-spinner--md kt-spinner--light";
+
+    private AddRaceEventModel[] raceEvents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        circuits = await CircuitClient.GetAllCircuitsAsync();
+        loading = false;
+    }
+
+    public EventCallback<int> NumberChanged { get; set; }
+
+    private Task onNumberChanged(ChangeEventArgs e)
+    {
+        //error = null;
+        NumberToAdd = Convert.ToInt32(e.Value.ToString());
+        try
+        {
+
+            raceEvents = new AddRaceEventModel[NumberToAdd];
+            for (int i = 0; i < NumberToAdd; i++)
+            {
+                raceEvents[i] = new AddRaceEventModel();
+            }
+
+            selectionMade = true;
+        }
+
+        catch (Exception ex)
+        {
+            throw ex;
+            //error = ex.Message;
+        }
+
+        return NumberChanged.InvokeAsync(NumberToAdd);
+    }
+    private async Task HandleSubmit()
+    {
+        if (pressed) return;
+        var builder = new System.Text.StringBuilder();
+        pressed = true;
+        buttonExtraClass = spinnerclass;
+        errors = new List<string>();
+
+
+        foreach (var rE in raceEvents)
+        {
+            if (string.IsNullOrEmpty(rE.CircuitId) || rE.CircuitId == "0") continue;
+            if (string.IsNullOrEmpty(rE.RaceEventName)) continue;
+            rE.SeasonId = SeasonId;
+            var rObj = await SeasonClient.AddRaceEventAsync(rE);
+
+            if (rObj.IsError)
+            {
+                errors.Add(rObj.Message);
+            }
+        }
+
+        if (!errors.Any())
+        {
+            NavigationManager.NavigateTo($"Seasons/Detail/{SeasonId}/{SeasonYear}");
+        }
+
+        buttonExtraClass = "";
+        pressed = false;
+    }
+}

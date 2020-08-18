@@ -1,0 +1,13 @@
+﻿<div class="kt-portlet__body">
+    <div class="kt-portlet__content">
+        @ChildContent
+    </div>
+</div>
+
+
+    @code {
+
+        [Parameter]
+        public RenderFragment ChildContent { get; set; }
+
+    }

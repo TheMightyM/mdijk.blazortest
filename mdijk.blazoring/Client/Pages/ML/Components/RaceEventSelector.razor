@@ -1,0 +1,59 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.ML
+@using mdijk.blazoring.Client.ViewModels.ML.Exp
+@using mdijk.blazoring.Client.StateMachine.MLEXP
+
+@inject SeasonClient SeasonClient
+
+@if (loading)
+{
+    <div>loading data...</div>
+}
+@if (RaceEvents != null && RaceEvents.Any() && !loading)
+{
+    <table>
+        <thead>
+            <tr>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rE in RaceEvents)
+            {
+                <tr @onclick="@( () => ClickRaceEventRow(rE.RaceEventId))">
+                    <td>@rE.SequenceNumber</td>
+                    <td>@rE.RaceEventName</td>
+                    <td>@rE.Circuit.CircuitName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public MLStateMachine StateMachine { get; set; }
+
+    [Parameter]
+    public EventCallback<MLStateMachine> StateMachineChanged { get; set; }
+
+    private ICollection<RaceEvent> RaceEvents { get; set; }
+
+    private bool loading = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        RaceEvents = await SeasonClient.GetSeasonCalendarAsync(StateMachine.SelectedSeason.SeasonId, StateMachine.SelectedSeason.SeasonYear);
+        loading = false;
+    }
+
+    private async Task ClickRaceEventRow(int raceEventId)
+    {
+        StateMachine.SelectedRaceEventId = raceEventId;
+        StateMachine.NextState();
+        await StateMachineChanged.InvokeAsync(StateMachine);
+    }
+
+}

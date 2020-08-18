@@ -1,0 +1,1749 @@
+{
+  "x-generator": "NSwag v13.7.0.0 (NJsonSchema v10.1.24.0 (Newtonsoft.Json v12.0.0.0))",
+  "swagger": "2.0",
+  "info": {
+    "title": "My Title",
+    "version": "1.0.0"
+  },
+  "host": "localhost:57256",
+  "schemes": [
+    "http"
+  ],
+  "produces": [
+    "text/plain",
+    "application/json",
+    "text/json"
+  ],
+  "paths": {
+    "/Circuit/getall": {
+      "get": {
+        "tags": [
+          "Circuit"
+        ],
+        "operationId": "Circuit_GetAllCircuits",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Circuit"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Circuit/addcircuit": {
+      "post": {
+        "tags": [
+          "Circuit"
+        ],
+        "operationId": "Circuit_AddCircuit",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "circuit",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Circuit"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Circuit/history/{circuitId}": {
+      "get": {
+        "tags": [
+          "Circuit"
+        ],
+        "operationId": "Circuit_GetCircuitHistoryEvent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "circuitId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/HistoricalRaceEvent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Driver/getall": {
+      "get": {
+        "tags": [
+          "Driver"
+        ],
+        "operationId": "Driver_GetAllDrivers",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Driver"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Driver/adddriver": {
+      "post": {
+        "tags": [
+          "Driver"
+        ],
+        "operationId": "Driver_AddDriver",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "driver",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Driver"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Driver/stats/{driverId}": {
+      "get": {
+        "tags": [
+          "Driver"
+        ],
+        "operationId": "Driver_GetDriverStatistics",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "driverId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DriverStatistics"
+            }
+          }
+        }
+      }
+    },
+    "/Driver/fullseasonstats/{driverId}": {
+      "get": {
+        "tags": [
+          "Driver"
+        ],
+        "operationId": "Driver_GetDriverSeasonStats",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "driverId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DriverSeasonStatistics"
+            }
+          }
+        }
+      }
+    },
+    "/Driver/byId/{driverId}": {
+      "get": {
+        "tags": [
+          "Driver"
+        ],
+        "operationId": "Driver_GetDriver",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "driverId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Driver"
+            }
+          }
+        }
+      }
+    },
+    "/Engine/getall": {
+      "get": {
+        "tags": [
+          "Engine"
+        ],
+        "operationId": "Engine_GetAllEngines",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Engine"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Engine/addEngine": {
+      "post": {
+        "tags": [
+          "Engine"
+        ],
+        "operationId": "Engine_AddEngine",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "Engine",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Engine"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/EventResult/getresultsforevent/{eventId}/{eventName}": {
+      "get": {
+        "tags": [
+          "EventResult"
+        ],
+        "operationId": "EventResult_GetResultsForEvent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          },
+          {
+            "type": "string",
+            "name": "eventName",
+            "in": "path",
+            "required": true,
+            "x-nullable": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/EventResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EventResult/AddCompleteResult": {
+      "post": {
+        "tags": [
+          "EventResult"
+        ],
+        "operationId": "EventResult_AddCompleteResult",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "eventResultModel",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddEventResultModel"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/EventResult/mostrecenteventresult": {
+      "get": {
+        "tags": [
+          "EventResult"
+        ],
+        "operationId": "EventResult_GetMostRecentEventResult",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/RaceEvent"
+            }
+          }
+        }
+      }
+    },
+    "/EventResult/UpdateCompleteResult": {
+      "post": {
+        "tags": [
+          "EventResult"
+        ],
+        "operationId": "EventResult_UpdateCompleteResult",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "eventResultModel",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddEventResultModel"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Season/getall": {
+      "get": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_GetAllSeasons",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Season"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Season/addSeason": {
+      "post": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_AddSeason",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "Season",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Season"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Season/register": {
+      "post": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_Register",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterModel"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Season/addentry": {
+      "post": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_AddEntry",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "entryModel",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddEntryModel"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Season/getseason/{seasonId}/{seasonYear}": {
+      "get": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_GetSeason",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "seasonId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          },
+          {
+            "type": "integer",
+            "name": "seasonYear",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Season"
+            }
+          }
+        }
+      }
+    },
+    "/Season/getseasoncalendar/{seasonId}/{seasonYear}": {
+      "get": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_GetSeasonCalendar",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "seasonId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          },
+          {
+            "type": "integer",
+            "name": "seasonYear",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RaceEvent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Season/addraceevent": {
+      "post": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_AddRaceEvent",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "raceEventModel",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddRaceEventModel"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Season/getentriesforevent/{eventId}": {
+      "get": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_GetEntriesForEvent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Entry"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Season/currentseasonresults": {
+      "get": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_CurrentSeasonResults",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SeasonResultsModel"
+            }
+          }
+        }
+      }
+    },
+    "/Season/seasonresults/{seasonId}": {
+      "get": {
+        "tags": [
+          "Season"
+        ],
+        "operationId": "Season_GetSeasonResults",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "seasonId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SeasonResultsModel"
+            }
+          }
+        }
+      }
+    },
+    "/Team/getall": {
+      "get": {
+        "tags": [
+          "Team"
+        ],
+        "operationId": "Team_GetAllTeams",
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Team/addTeam": {
+      "post": {
+        "tags": [
+          "Team"
+        ],
+        "operationId": "Team_AddTeam",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "name": "Team",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Team"
+            },
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddItemResponse"
+            }
+          }
+        }
+      }
+    },
+    "/Team/stats/{teamId}": {
+      "get": {
+        "tags": [
+          "Team"
+        ],
+        "operationId": "Team_GetTeamStatistics",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TeamStatistics"
+            }
+          }
+        }
+      }
+    },
+    "/Team/participation/{teamId}": {
+      "get": {
+        "tags": [
+          "Team"
+        ],
+        "operationId": "Team_GetParticipation",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamSeasonParticipation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Team/maxraces/{teamId}": {
+      "get": {
+        "tags": [
+          "Team"
+        ],
+        "operationId": "Team_GetMaxRacesInSeasonForTeam",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      }
+    },
+    "/Team/getseasonresults/{teamId}/{seasonId}": {
+      "get": {
+        "tags": [
+          "Team"
+        ],
+        "operationId": "Team_GetSeasonResults",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          },
+          {
+            "type": "integer",
+            "name": "seasonId",
+            "in": "path",
+            "required": true,
+            "format": "int32",
+            "x-nullable": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "x-nullable": false,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TeamSeason"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Circuit": {
+      "type": "object",
+      "required": [
+        "circuitId"
+      ],
+      "properties": {
+        "circuitId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "circuitName": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "AddItemResponse": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ResponseModel"
+        },
+        {
+          "type": "object",
+          "required": [
+            "newItemId"
+          ],
+          "properties": {
+            "newItemId": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      ]
+    },
+    "ResponseModel": {
+      "type": "object",
+      "required": [
+        "isError"
+      ],
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "isError": {
+          "type": "boolean"
+        }
+      }
+    },
+    "HistoricalRaceEvent": {
+      "type": "object",
+      "required": [
+        "raceEventId",
+        "sequenceNumber",
+        "seasonId",
+        "seasonYear"
+      ],
+      "properties": {
+        "raceEventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sequenceNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "raceEventName": {
+          "type": "string"
+        },
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonYear": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "Driver": {
+      "type": "object",
+      "required": [
+        "driverId",
+        "driverNumber"
+      ],
+      "properties": {
+        "driverId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "driverNumber": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "DriverStatistics": {
+      "type": "object",
+      "required": [
+        "driverId",
+        "numberOfRaces",
+        "careerPoints",
+        "numberOfWins",
+        "numberOfPodiums",
+        "numberOfPoles",
+        "numberOfDNF",
+        "numberOfDNQ"
+      ],
+      "properties": {
+        "driverId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "driverName": {
+          "type": "string"
+        },
+        "numberOfRaces": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "careerPoints": {
+          "type": "number",
+          "format": "float"
+        },
+        "numberOfWins": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfPodiums": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfPoles": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfDNF": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfDNQ": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "DriverSeasonStatistics": {
+      "type": "object",
+      "required": [
+        "driverId"
+      ],
+      "properties": {
+        "driverId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DriverSeason"
+          }
+        }
+      }
+    },
+    "DriverSeason": {
+      "type": "object",
+      "required": [
+        "seasonYear",
+        "seasonId",
+        "eventsInSeason"
+      ],
+      "properties": {
+        "seasonYear": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eventsInSeason": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DriverResult"
+          }
+        }
+      }
+    },
+    "DriverResult": {
+      "type": "object",
+      "required": [
+        "eventSequenceNr",
+        "eventId",
+        "finishingPosition",
+        "startingPosition",
+        "started",
+        "finished"
+      ],
+      "properties": {
+        "eventSequenceNr": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eventName": {
+          "type": "string"
+        },
+        "finishingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "startingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "started": {
+          "type": "boolean"
+        },
+        "finished": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Engine": {
+      "type": "object",
+      "required": [
+        "engineId"
+      ],
+      "properties": {
+        "engineId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "engineName": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "EventResult": {
+      "type": "object",
+      "required": [
+        "eventResultId",
+        "finishingPosition",
+        "fastestLap"
+      ],
+      "properties": {
+        "eventResultId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "finishingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fastestLap": {
+          "type": "boolean"
+        },
+        "driverEntry": {
+          "$ref": "#/definitions/DriverEntry"
+        },
+        "metaData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventResultMetaData"
+          }
+        },
+        "typedMetaData": {
+          "$ref": "#/definitions/EventResultMetaDataTyped"
+        }
+      }
+    },
+    "DriverEntry": {
+      "type": "object",
+      "required": [
+        "driverEntryId"
+      ],
+      "properties": {
+        "driverEntryId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "driver": {
+          "$ref": "#/definitions/Driver"
+        },
+        "entryFullEntryName": {
+          "type": "string"
+        },
+        "entryTeam": {
+          "$ref": "#/definitions/Team"
+        },
+        "entryEngine": {
+          "$ref": "#/definitions/Engine"
+        }
+      }
+    },
+    "Team": {
+      "type": "object",
+      "required": [
+        "teamId"
+      ],
+      "properties": {
+        "teamId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "teamName": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "EventResultMetaData": {
+      "type": "object",
+      "required": [
+        "eventResultMetaDataId"
+      ],
+      "properties": {
+        "eventResultMetaDataId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "EventResultMetaDataTyped": {
+      "type": "object",
+      "required": [
+        "gridPosition",
+        "laps",
+        "fastestLapRank"
+      ],
+      "properties": {
+        "points": {
+          "type": "string"
+        },
+        "gridPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "laps": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "fastestLap": {
+          "type": "string"
+        },
+        "fastestLapRank": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AddEventResultModel": {
+      "type": "object",
+      "required": [
+        "eventId"
+      ],
+      "properties": {
+        "eventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AddEventResultModelRow"
+          }
+        }
+      }
+    },
+    "AddEventResultModelRow": {
+      "type": "object",
+      "required": [
+        "finishingPosition"
+      ],
+      "properties": {
+        "finishingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "driverEntryId": {
+          "type": "string"
+        },
+        "points": {
+          "type": "string"
+        },
+        "gridPosition": {
+          "type": "string"
+        },
+        "laps": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "fastestLap": {
+          "type": "string"
+        },
+        "fastestLapRank": {
+          "type": "string"
+        },
+        "metaDatas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MetaData"
+          }
+        },
+        "entryName": {
+          "type": "string"
+        }
+      }
+    },
+    "MetaData": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "RaceEvent": {
+      "type": "object",
+      "required": [
+        "raceEventId",
+        "sequenceNumber"
+      ],
+      "properties": {
+        "raceEventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sequenceNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "raceEventName": {
+          "type": "string"
+        },
+        "circuit": {
+          "$ref": "#/definitions/Circuit"
+        },
+        "season": {
+          "$ref": "#/definitions/Season"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventResult"
+          }
+        }
+      }
+    },
+    "Season": {
+      "type": "object",
+      "required": [
+        "seasonId",
+        "seasonYear"
+      ],
+      "properties": {
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonYear": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Entry"
+          }
+        },
+        "raceEvents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RaceEvent"
+          }
+        }
+      }
+    },
+    "Entry": {
+      "type": "object",
+      "required": [
+        "entryId"
+      ],
+      "properties": {
+        "entryId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fullEntryName": {
+          "type": "string"
+        },
+        "team": {
+          "$ref": "#/definitions/Team"
+        },
+        "drivers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DriverEntry"
+          }
+        },
+        "engine": {
+          "$ref": "#/definitions/Engine"
+        }
+      }
+    },
+    "RegisterModel": {
+      "type": "object",
+      "required": [
+        "seasonId",
+        "teamId",
+        "driverId"
+      ],
+      "properties": {
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "teamId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "driverId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "entryName": {
+          "type": "string"
+        }
+      }
+    },
+    "AddEntryModel": {
+      "type": "object",
+      "required": [
+        "entryId",
+        "seasonId"
+      ],
+      "properties": {
+        "entryId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fullEntryName": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "firstDriverId": {
+          "type": "string"
+        },
+        "secondDriverId": {
+          "type": "string"
+        },
+        "engineId": {
+          "type": "string"
+        },
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AddRaceEventModel": {
+      "type": "object",
+      "required": [
+        "raceEventId",
+        "seasonId"
+      ],
+      "properties": {
+        "raceEventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sequenceNr": {
+          "type": "string"
+        },
+        "raceEventName": {
+          "type": "string"
+        },
+        "circuitId": {
+          "type": "string"
+        },
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "SeasonResultsModel": {
+      "type": "object",
+      "required": [
+        "seasonId",
+        "seasonYear"
+      ],
+      "properties": {
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonYear": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "raceEvents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SeasonRaceEvent"
+          }
+        }
+      }
+    },
+    "SeasonRaceEvent": {
+      "type": "object",
+      "required": [
+        "raceEventId",
+        "sequenceNumber"
+      ],
+      "properties": {
+        "raceEventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sequenceNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "raceEventName": {
+          "type": "string"
+        },
+        "circuit": {
+          "$ref": "#/definitions/Circuit"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SeasonRaceEventResult"
+          }
+        }
+      }
+    },
+    "SeasonRaceEventResult": {
+      "type": "object",
+      "required": [
+        "eventResultId",
+        "finishingPosition",
+        "fastestLap"
+      ],
+      "properties": {
+        "eventResultId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "finishingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fastestLap": {
+          "type": "boolean"
+        },
+        "driverEntry": {
+          "$ref": "#/definitions/DriverEntry"
+        },
+        "metaData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventResultMetaData"
+          }
+        }
+      }
+    },
+    "TeamStatistics": {
+      "type": "object",
+      "required": [
+        "teamId",
+        "numberOfRaces",
+        "totalPoints",
+        "numberOfWins",
+        "numberOfPodiums",
+        "numberOfPoles"
+      ],
+      "properties": {
+        "teamId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "teamName": {
+          "type": "string"
+        },
+        "numberOfRaces": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalPoints": {
+          "type": "number",
+          "format": "float"
+        },
+        "numberOfWins": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfPodiums": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfPoles": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "TeamSeasonParticipation": {
+      "type": "object",
+      "required": [
+        "seasonId",
+        "seasonYear",
+        "numberOfDrivers"
+      ],
+      "properties": {
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonYear": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfDrivers": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "TeamSeason": {
+      "type": "object",
+      "required": [
+        "racesInSeason",
+        "seasonId",
+        "seasonYear"
+      ],
+      "properties": {
+        "racesInSeason": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seasonYear": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "driversIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "eventResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TeamSeasonEventResult"
+          }
+        }
+      }
+    },
+    "TeamSeasonEventResult": {
+      "type": "object",
+      "required": [
+        "eventSequenceNr",
+        "eventId"
+      ],
+      "properties": {
+        "eventSequenceNr": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eventName": {
+          "type": "string"
+        },
+        "driverResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TeamSeasonEventDriverResult"
+          }
+        }
+      }
+    },
+    "TeamSeasonEventDriverResult": {
+      "type": "object",
+      "required": [
+        "driverId",
+        "finishingPosition",
+        "startingPosition",
+        "started",
+        "finished"
+      ],
+      "properties": {
+        "driverId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "finishingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "startingPosition": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "started": {
+          "type": "boolean"
+        },
+        "finished": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

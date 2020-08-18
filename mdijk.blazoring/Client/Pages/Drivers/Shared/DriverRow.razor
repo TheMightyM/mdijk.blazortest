@@ -1,0 +1,23 @@
+﻿@using mdijk.blazoring.Shared.Models
+
+@if (driver != null)
+{
+<tr>
+    <td><InputText @bind-Value="driver.FirstName" class="form-control" /></td>
+    <td><InputText @bind-Value="driver.LastName" class="form-control" /></td>
+    <InputSelect id="inputCountry" @bind-Value="driver.Country" class="form-control">
+        <CountrySelect />
+    </InputSelect>
+    <td><InputNumber @bind-Value="driver.DriverNumber" class="form-control" /></td>
+</tr>
+}
+else
+{
+    <tr><td colspan="3">Driver cannot be null</td></tr>
+}
+
+@code
+{
+    [Parameter]
+    public Driver driver { get; set;}
+}

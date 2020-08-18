@@ -1,0 +1,150 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using ChartJs.Blazor;
+@using ChartJs.Blazor.Charts
+@using ChartJs.Blazor.ChartJS.LineChart
+@using ChartJs.Blazor.ChartJS.Common
+@using ChartJs.Blazor.ChartJS.PieChart
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.Util
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Enums
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@inject LaptimeClient LaptimeClient
+
+<Portlet>
+    <PortletHead>
+        Driver Positions throughout the Grand Prix
+    </PortletHead>
+    <PortletBody>
+        @if (_lineConfig != null)
+        {
+            <ChartJsLineChart @ref="_linechartJs" Config="@_lineConfig" Width="600" Height="300" />
+        }
+    </PortletBody>
+</Portlet>
+
+@code {
+
+        [Parameter]
+        public int EventId { get; set; }
+
+    private ICollection<DriverLaptimes> _laptimeCollection;
+
+    private LineConfig _lineConfig;
+    private ChartJsLineChart _linechartJs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _laptimeCollection = await LaptimeClient.GetLaptimesForEventAsync(EventId);
+
+        if (_laptimeCollection != null && _laptimeCollection.Any())
+        {
+            GenerateGraph();
+        }
+    }
+    private void GenerateGraph()
+    {
+
+        _lineConfig = new LineConfig
+        {
+            Options = new LineOptions
+            {
+
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Position"
+                },
+                Responsive = true,
+                Hover = new LineOptionsHover
+                {
+                    Intersect = true,
+                    Mode = InteractionMode.Y
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = false
+                },
+                ShowLines = true,
+                Scales = new Scales
+                {
+
+                    xAxes = new List<CartesianAxis>
+{
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Lapnumber"
+                            },
+                            GridLines = new GridLines
+                            {
+                                Display = false
+                            },
+                            Ticks = new LinearCartesianTicks
+                            {
+                                Min = 1,
+                                Max = _laptimeCollection.First().Laptimes.Max(x =>x.LapNumber),
+                            }
+                        }
+                    },
+                    yAxes = new List<CartesianAxis>
+{
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Position during race"
+                            },
+                            Ticks = new LinearCartesianTicks
+                            {
+                                Min = 1,
+                                Max = _laptimeCollection.Count()
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        //foreach (var result in SeasonResults.RaceEvents.First().Results)
+        foreach (var driverLaptimes in _laptimeCollection)
+        {
+            //    var driver = result.DriverEntry.Driver;
+            var placings = driverLaptimes.Laptimes
+                .OrderBy(x =>x.LapNumber)
+                .Select(x =>
+                        new Point(x.LapNumber, x.CurrentPosition)).ToList();
+
+            var colorString = GetDriverColor(driverLaptimes.Driver);
+            var _dsp = new LineDataset<Point>
+            {
+                BackgroundColor = colorString,
+                BorderColor = colorString,
+                Label = $"{driverLaptimes.Driver.FirstName} {driverLaptimes.Driver.LastName}",
+                Fill = false,
+                BorderWidth = 1,
+                PointRadius = 1,
+                PointBorderWidth = 0,
+                LineTension = 0.00001
+
+            };
+            _dsp.AddRange(placings);
+
+
+            _lineConfig.Data.Datasets.Add(_dsp);
+        }
+    }
+
+    private string GetDriverColor(Driver driver)
+    {
+        var bytes = mdijk.blazoring.Shared.DriverColourCreator.CreateHexFromName($"{driver.FirstName} {driver.LastName}");
+
+        return ColorUtil.ColorHexString(bytes.Item1, bytes.Item2, bytes.Item3);
+    }
+
+
+}

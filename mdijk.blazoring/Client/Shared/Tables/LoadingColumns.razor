@@ -1,0 +1,23 @@
+﻿<tr class="text-input__loading">
+    <td><div class="kt-spinner kt-spinner--lg kt-spinner--warning" id="dIncomeSpinner" /></td>
+    @for (int i = 1; i < ColumnCount; i++)
+    {
+        <td class="text-input__loading-line">&nbsp;</td>
+    }
+</tr>
+
+@for (int g = 0; g < 16; g++)
+{
+    <tr class="text-input__loading">
+        @for (int i = 0; i < ColumnCount; i++)
+        {
+            <td class="text-input__loading-line">&nbsp;</td>
+        }
+    </tr>
+}
+
+@code
+{
+    [Parameter]
+    public int ColumnCount { get; set; }
+}

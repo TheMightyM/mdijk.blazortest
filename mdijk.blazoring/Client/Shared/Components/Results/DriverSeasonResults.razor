@@ -1,0 +1,118 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@using mdijk.blazoring.Shared;
+
+<Portlet>
+    <PortletHead>Current Driver Standings</PortletHead>
+    <PortletBody>
+        @if (loading)
+        {
+            <table>
+                <LoadingThreeColumns />
+            </table>
+        }
+        else
+        {
+            <div class="kt-section">
+                <div class="kt-section__content">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Driver</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int counter = 1;
+                            }
+                            @foreach (var driverPoint in driverPoints.OrderByDescending(x => x.Value).Take(Limit.Value))
+                            {
+                                <tr>
+                                    <td>@(counter++)</td>
+                                    <td>
+                                        <a href="@CreateNavLink(driversRef[driverPoint.Key])">
+                                            @DriverFormatter.Format(@driversRef[driverPoint.Key])
+                                        </a>
+                                    </td>
+                                    <td>@driverPoint.Value</td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        </PortletBody>
+</Portlet>
+
+@code {
+
+    [Parameter]
+    public SeasonResultsModel SeasonResults { get; set; }
+
+    [Parameter]
+    public int? Limit { get; set; }
+
+    private IDictionary<int, Driver> driversRef;
+    private IDictionary<int, int> driverPoints; // key: driverId, value: points
+
+
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.FromResult(true);
+        ProcessSeasonResults();
+
+
+        if(!Limit.HasValue)
+        {
+            Limit = driversRef.Count;
+        }
+        loading = false;
+    }
+
+    private void ProcessSeasonResults()
+    {
+        driversRef = new Dictionary<int, Driver>();
+
+        driverPoints = new Dictionary<int, int>();
+
+        foreach (var rE in SeasonResults.RaceEvents)
+        {
+            foreach (var result in rE.Results)
+            {
+                if (!driversRef.ContainsKey(result.DriverEntry.Driver.DriverId))
+                {
+                    driversRef.Add(result.DriverEntry.Driver.DriverId, result.DriverEntry.Driver);
+                    driverPoints.Add(result.DriverEntry.Driver.DriverId, 0);
+                }
+
+
+                var points = 0;
+                if (Points.PointsForPosition.ContainsKey(result.FinishingPosition))
+                {
+                    points = Points.PointsForPosition[result.FinishingPosition];
+                    if (result.FastestLap && Points.IsFastestLap(result.FinishingPosition))
+                    {
+                        points += Points.FastedLap;
+                    }
+                }
+
+                driverPoints[result.DriverEntry.Driver.DriverId] += points;
+            }
+        }
+    }
+
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+
+
+}

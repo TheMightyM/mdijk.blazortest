@@ -1,0 +1,15 @@
+﻿@using mdijk.blazoring.Shared.Models
+
+<tr>
+    <td><InputText @bind-Value="circuit.CircuitName" class="form-control" /></td>
+    <InputSelect id="inputCountry" @bind-Value="circuit.Country" class="form-control">
+        <CountrySelect />
+    </InputSelect>
+</tr>
+
+
+@code
+{
+    [Parameter]
+    public Circuit circuit { get; set;}
+}

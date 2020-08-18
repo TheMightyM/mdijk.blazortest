@@ -1,0 +1,103 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+
+<Portlet>
+    <PortletHead>
+        @if (Limit.HasValue) { <span>Top @Limit.Value</span>}
+        Results for the @SeasonYear @EventName
+    </PortletHead>
+    <PortletBody>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Driver</th>
+                    <th>Team</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                   @if (!Results.Any())
+                    {
+                        <tr>
+                            <td colspan="4">
+                                Either the event has not been completed yet, or no results have been entered.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Results.Take(Limit.Value))
+                        {
+                            <tr>
+                                <td>@row.FinishingPosition</td>
+                                <td>
+                                    <a href="@CreateNavLink(row.DriverEntry.Driver)">
+                                        @DisplayDriver(row.DriverEntry)
+                                    </a>
+                                </td>
+                                <td>@DisplayTeam(row.DriverEntry)</td>
+                            </tr>
+                        }
+                    }
+            </tbody>
+        </table>
+    </PortletBody>
+</Portlet>
+
+@code
+{
+    [Parameter]
+    public int SeasonYear { get; set; }
+
+    [Parameter]
+    public string EventName { get; set; }
+
+    [Parameter]
+    public ICollection<EventResult> Results { get; set; }
+
+    [Parameter]
+    public int? Limit { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.FromResult(true);
+        if(!Limit.HasValue)
+        {
+            Limit = Results.Count;
+        }
+    }
+
+    private string DisplayDriver(DriverEntry driverEntry)
+    {
+        return $"{driverEntry.Driver.FirstName} {driverEntry.Driver.LastName} ({driverEntry.Driver.DriverNumber})";
+    }
+
+    private string DisplayTeam(DriverEntry driverEntry)
+    {
+        return $"{driverEntry.EntryFullEntryName}";
+    }
+
+    private string DisplayPoints(int finishingPosition, bool fastedLap)
+    {
+        if (mdijk.blazoring.Shared.Points.PointsForPosition.ContainsKey(finishingPosition))
+        {
+            var points = mdijk.blazoring.Shared.Points.PointsForPosition[finishingPosition];
+            if (fastedLap)
+            {
+                points += mdijk.blazoring.Shared.Points.FastedLap;
+            }
+
+            return $"{points}";
+        }
+
+        return "0";
+    }
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+
+}

@@ -1,0 +1,114 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@using mdijk.blazoring.Shared;
+
+<Portlet>
+    <PortletHead>Current Team Standings</PortletHead>
+    <PortletBody>
+        @if (loading)
+        {
+            <table>
+                <LoadingThreeColumns />
+            </table>
+        }
+        else
+        {
+            <div class="kt-section">
+                <div class="kt-section__content">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Driver</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int teamCounter = 1;
+                            }
+                            @foreach (var teamPoint in teamPoints.OrderByDescending(x => x.Value).Take(Limit.Value))
+                            {
+                                <tr>
+                                    <td>@(teamCounter++)</td>
+                                    <td>@teamNameRef[teamPoint.Key]</td>
+                                    <td>@teamPoint.Value</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </PortletBody>
+</Portlet>
+
+@code {
+
+    [Parameter]
+    public SeasonResultsModel SeasonResults { get; set; }
+
+    [Parameter]
+    public int? Limit { get; set; }
+
+    private IDictionary<int, Team> teamsRef;
+    private IDictionary<int, int> teamPoints;
+    private IDictionary<int, string> teamNameRef;
+
+
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.FromResult(true);
+
+        ProcessSeasonResults();
+
+        if(!Limit.HasValue)
+        {
+            Limit = teamsRef.Count;
+        }
+
+        loading = false;
+    }
+
+    private void ProcessSeasonResults()
+    {
+        teamsRef = new Dictionary<int, Team>();
+        teamNameRef = new Dictionary<int, string>();
+
+
+        teamPoints = new Dictionary<int, int>();
+
+
+        foreach (var rE in SeasonResults.RaceEvents)
+        {
+            foreach (var result in rE.Results)
+            {
+                if (!teamsRef.ContainsKey(result.DriverEntry.EntryTeam.TeamId))
+                {
+                    teamsRef.Add(result.DriverEntry.EntryTeam.TeamId, result.DriverEntry.EntryTeam);
+                    teamPoints.Add(result.DriverEntry.EntryTeam.TeamId, 0);
+                    teamNameRef.Add(result.DriverEntry.EntryTeam.TeamId, result.DriverEntry.EntryFullEntryName);
+                }
+
+
+                var points = 0;
+                if (Points.PointsForPosition.ContainsKey(result.FinishingPosition))
+                {
+                    points = Points.PointsForPosition[result.FinishingPosition];
+                    if (result.FastestLap && Points.IsFastestLap(result.FinishingPosition))
+                    {
+                        points += Points.FastedLap;
+                    }
+                }
+
+                teamPoints[result.DriverEntry.EntryTeam.TeamId] += points;
+
+            }
+        }
+    }
+
+
+}

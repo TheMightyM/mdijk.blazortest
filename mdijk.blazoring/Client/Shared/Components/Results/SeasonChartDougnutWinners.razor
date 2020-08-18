@@ -1,0 +1,100 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using ChartJs.Blazor;
+@using ChartJs.Blazor.Charts
+@using ChartJs.Blazor.ChartJS.LineChart
+@using ChartJs.Blazor.ChartJS.Common
+@using ChartJs.Blazor.ChartJS.PieChart
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.Util
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Enums
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@inject SeasonClient SeasonClient
+
+@if (_config != null)
+{
+    <div class="row">
+        <ChartJsPieChart @ref="_pieChartJs" Config="@_config" Width="600" Height="300" />
+    </div>
+}
+@code {
+
+    private PieConfig _config;
+    private ChartJsPieChart _pieChartJs;
+
+    [Parameter]
+    public int SeasonId { get; set; }
+    private SeasonResultsModel SeasonResults = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SeasonResults = await SeasonClient.GetSeasonResultsAsync(SeasonId);
+        GenerateGraph();
+    }
+
+    private void GenerateGraph()
+    {
+        if (SeasonResults == null) return;
+
+        _config = new PieConfig
+        {
+            Options = new PieOptions(true)
+            {
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Number of Wins"
+                },
+                Responsive = true,
+                Animation = new ArcAnimation
+                {
+                    AnimateRotate = true,
+                    AnimateScale = true
+                }
+            }
+        };
+
+        Dictionary<int, Driver> drivers = new Dictionary<int, Driver>();
+        Dictionary<int, int> winCount = new Dictionary<int, int>();
+
+        foreach (var re in SeasonResults.RaceEvents)
+        {
+            var winner = re.Results.First(x => x.FinishingPosition == 1).DriverEntry.Driver;
+            if (!winCount.ContainsKey(winner.DriverId))
+            {
+                drivers.Add(winner.DriverId, winner);
+                winCount.Add(winner.DriverId, 0);
+            }
+
+            winCount[winner.DriverId]++;
+        }
+
+        var driverNames = drivers.Select(driver => $"{driver.Value.FirstName} {driver.Value.LastName}").ToArray();
+        var driverColours = drivers.Select(driver => GetDriverColor(driver.Value)).ToArray();
+        var wins = drivers.Select(driver => Convert.ToDouble(winCount[driver.Key]));
+
+        _config.Data.Labels.AddRange(driverNames);
+
+        var pieSet = new PieDataset
+        {
+            BackgroundColor = driverColours,
+            BorderWidth = 0,
+            HoverBackgroundColor = ColorUtil.RandomColorString(),
+            HoverBorderColor = ColorUtil.RandomColorString(),
+            HoverBorderWidth = 1,
+            BorderColor = "#ffffff",
+        };
+        pieSet.Data.AddRange(wins);
+        _config.Data.Datasets.Add(pieSet);
+    }
+
+    private string GetDriverColor(Driver driver)
+    {
+        var bytes = mdijk.blazoring.Shared.DriverColourCreator.CreateHexFromName($"{driver.FirstName} {driver.LastName}");
+
+        return ColorUtil.ColorHexString(bytes.Item1, bytes.Item2, bytes.Item3);
+    }
+
+}

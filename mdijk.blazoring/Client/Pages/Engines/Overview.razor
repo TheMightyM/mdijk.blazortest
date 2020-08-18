@@ -1,0 +1,59 @@
+﻿@page "/Engines/Overview"
+@using mdijk.blazoring.Shared.Models
+@inject EngineClient EngineClient
+
+
+<div class="col-md-12 col-lg-12 col-xl-12">
+    <div class="text-center">
+        <h1 class="display-4">All Engines</h1>
+    </div>
+
+    <div class="order-lg-1 order-xl-3">
+        <div class="kt-portlet">
+
+            <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                    <h3 class="kt-portlet__head-title">Engines</h3>
+                </div>
+            </div>
+
+
+            <div class="kt-portlet__body" id="dEngines">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Name</th>
+                        <th>Nationality</th>
+                    </tr>
+                    @if (engines == null)
+                    {
+                        <LoadingTwoColumns />
+                    }
+                    else
+                    {
+                        @foreach (var engine in engines)
+                        {
+                            <tr>
+                                <td>@engine.EngineName</td>
+                                <td>@engine.Country</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <NavLink class="nav-link" href="Engines/BulkAdd">
+        Bulk Add
+    </NavLink>
+</div>
+
+@code {
+
+    ICollection<Engine> engines = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        engines = await EngineClient.GetAllEnginesAsync();
+    }
+}

@@ -1,0 +1,120 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.ML
+@using mdijk.blazoring.Client.ViewModels.ML.Exp
+@using mdijk.blazoring.Shared 
+@using mdijk.blazoring.Client.StateMachine.MLEXP
+@inject SeasonClient SeasonClient
+
+@if (loading)
+{
+    <div>loading drivers...</div>
+}
+else
+{
+   
+        <EditForm Model="@StateMachine.DriverCircuitRequest" OnValidSubmit="HandleSubmit" class="kt-form kt-form--label-right">
+            @{
+                <div class="row">
+                    To override the number of laps in a race, enter any value above zero: <InputNumber @bind-Value="StateMachine.DriverCircuitRequest.TotalLaps" />
+                </div>
+                bool keepGoing = true;
+                int counter = 0;
+                while (keepGoing)
+                {
+                    var printDrivers = StateMachine.SeasonsDrivers.Values.Skip(counter * 4).Take(4);
+
+                    <div class="form-group form-row">
+                        @foreach (var d in printDrivers)
+                        {
+                            <div class="col-3" @onclick="@(() => HandleSelect(d.DriverId))">                               
+                                <span class="tn btn-outline-primary">
+                                    @if (StateMachine.DriverCircuitRequest.DriverIds.Any(x => x == d.DriverId))
+                                    {
+                                        <span>[X] </span>
+                                    }
+                                    else
+                                    {
+                                        <span>[ ] </span>
+                                    }
+                                    @mdijk.blazoring.Shared.DriverFormatter.Format(d)
+                                </span>
+                            </div>
+                        }
+                    </div>
+
+                    counter++;
+                    if (!printDrivers.Any())
+                    {
+                        keepGoing = false;
+                    }
+                }
+            }
+
+            <div class="form-group row">
+                <div class="col-sm-10">
+
+                    <button type="submit" class="btn btn-primary">PREDICT!</button>
+                </div>
+            </div>
+        </EditForm>
+   
+}
+
+@code {
+
+    [Parameter]
+    public MLStateMachine StateMachine { get; set; }
+
+    [Parameter]
+    public EventCallback<MLStateMachine> StateMachineChanged { get; set; }
+
+    private bool loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+
+        StateMachine.DriverCircuitRequest = new MLDriverCircuitRequest
+        {
+            RaceEventId = StateMachine.SelectedRaceEventId,
+            DriverIds = new List<int>()
+        };
+        // deze is even een lelijke hack! misschien iets verderop wat anders doen meneer vandijk!
+        var entries = (await SeasonClient.GetSeasonAsync(StateMachine.SelectedSeason.SeasonId, StateMachine.SelectedSeason.SeasonYear)).Entries;
+        StateMachine.SeasonsDrivers = new Dictionary<int, Driver>();
+        foreach (var entry in entries)
+        {
+            foreach (var driver in entry.Drivers)
+            {
+                if (StateMachine.SeasonsDrivers.ContainsKey(driver.Driver.DriverId))
+                {
+                    continue;
+                }
+
+                StateMachine.SeasonsDrivers.Add(driver.Driver.DriverId, driver.Driver);
+            }
+        }
+
+        loading = false;
+    }
+
+    protected async Task HandleSelect(int driverId)
+    {
+        await Task.FromResult(1);
+
+        if (StateMachine.DriverCircuitRequest.DriverIds.Any(x => x == driverId))
+        {
+            StateMachine.DriverCircuitRequest.DriverIds.Remove(driverId);
+        }
+        else
+        {
+            StateMachine.DriverCircuitRequest.DriverIds.Add(driverId);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        await StateMachineChanged.InvokeAsync(StateMachine);
+        StateMachine.NextState();
+    }
+}

@@ -1,0 +1,192 @@
+﻿@page "/Drivers/Info/{DriverId}/{DriverFullName}"
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Statistics
+@using mdijk.blazoring.Client.Shared.Components.JsInterop
+
+@inject DriverClient DriverClient
+@inject IJSRuntime JSRuntime
+
+<div class="row">
+    <Portlet>
+        <PortletHead>
+            @if (Loading)
+            {
+                <div>Loading driver statistics</div>
+            }
+            else
+            {
+                <span>Statistics for @DriverStatistics.DriverName</span>
+            }
+        </PortletHead>
+        <PortletBody>
+            @if (Loading)
+            {
+                <div>loading...</div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-3">
+                        <strong>Number of Races</strong>
+                    </div>
+                    <div class="col-3">
+                        @DriverStatistics.NumberOfRaces
+                    </div>
+                    <div class="col-3">
+                        <strong>Career Points</strong>
+                    </div>
+                    <div class="col-3">
+                        @DriverStatistics.CareerPoints
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <strong>Wins</strong>
+                    </div>
+                    <div class="col-3">
+                        @DriverStatistics.NumberOfWins
+                    </div>
+                    <div class="col-3">
+                        <strong>Podiums</strong>
+                    </div>
+                    <div class="col-3">
+                        @DriverStatistics.NumberOfPodiums
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <strong>Polepositions</strong>
+                    </div>
+                    <div class="col-3">
+                        @DriverStatistics.NumberOfPoles
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-3">
+                        <strong>DNFs</strong>
+                    </div>
+                    <div class="col-3">
+                        @DriverStatistics.NumberOfDNF
+                    </div>
+                    @if (DriverStatistics.NumberOfDNQ > 0)
+                    {
+                        <div class="col-3">
+                            <strong>Not qualified<br /></strong>
+                        </div>
+                        <div class="col-3">
+                            @DriverStatistics.NumberOfDNQ
+                        </div>
+                    }
+                </div>
+            }
+        </PortletBody>
+    </Portlet>
+</div>
+
+@if (!Loading)
+{
+    <div class="row">
+        <Portlet>
+            <PortletHead>All results</PortletHead>
+            <PortletBody>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>&nbsp;</td>
+                            @for (var i = 1; i <= MaxCols; i++)
+                            {
+                                <td>@i</td>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var season in DriverSeasonStatistics.Seasons)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="/Seasons/Detail/@season.SeasonId/@season.SeasonYear">
+                                        @season.SeasonYear
+                                    </a>
+                                </td>
+                                @for (int j = 1; j <= season.EventsInSeason; j++)
+                                {
+                                    if (season.Results.Any(x => x.EventSequenceNr == j))
+                                    {
+                                        var res = season.Results.First(x => x.EventSequenceNr == j);
+                                        <td>
+                                            <a href="/Results/Overall/@res.EventId/@season.SeasonYear/@res.EventName"
+                                               @onmouseover="@(() => LinkMouseOver(res.EventId, season.SeasonYear, res.EventName))" id="@CreateElementId(res.EventId)"
+                                               >
+                                                @DisplayResultValue(res)
+                                            </a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>&nbsp;</td>
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </PortletBody>
+        </Portlet>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public string DriverId { get; set; }
+    [Parameter]
+    public string DriverFullName { get; set; }
+
+    private DriverStatistics DriverStatistics { get; set; }
+    private DriverSeasonStatistics DriverSeasonStatistics { get; set; }
+    private bool Loading = true;
+
+
+    private int MaxCols = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        DriverStatistics = await DriverClient.GetDriverStatisticsAsync(Convert.ToInt32(DriverId));
+        DriverSeasonStatistics = await DriverClient.GetDriverSeasonStatsAsync(Convert.ToInt32(DriverId));
+
+        MaxCols = DriverSeasonStatistics.Seasons.Max(x => x.EventsInSeason);
+        Loading = false;
+    }
+
+    private async Task LinkMouseOver(int eventId, int seasonYear, string eventName)
+    {
+        var dr = new mdijk.blazoring.Client.Shared.Components.JsInterop.DriverResultsInterop
+        {
+            DriverId = Convert.ToInt32(DriverId),
+            EventId = eventId,
+            ElementId = $"#{CreateElementId(eventId)}",
+            EventName = eventName,
+            SeasonYear = seasonYear
+        };
+        var objRef = DotNetObjectReference.Create(dr);
+        await JSRuntime.InvokeAsync<bool>("BlazorDriverInterop.driverEventPopup", objRef, dr);
+    }
+
+    private string DisplayResultValue(DriverResult dr)
+    {
+        if (!dr.Started) return "DNQ";
+        if (!dr.Finished) return "DNF";
+        return $"{dr.FinishingPosition}";
+    }
+
+    public string CreateElementId(int eventId)
+    {
+        return $"aEvent{eventId}";
+    }
+}

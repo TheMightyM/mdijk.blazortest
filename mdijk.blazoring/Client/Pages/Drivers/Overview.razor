@@ -1,0 +1,142 @@
+﻿@page "/Drivers/Overview"
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.WeirdScience 
+@inject DriverClient DriverClient
+
+<div class="row">
+    <Portlet>
+        <PortletHead>Drivers</PortletHead>
+        <PortletBody>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Nationality</th>
+                        <th>Driver number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (drivers == null)
+                    {
+                        <LoadingThreeColumns />
+                    }
+                    else
+                    {
+                        @foreach (var driver in drivers)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@CreateNavLink(driver)">@driver.FirstName @driver.LastName</a>
+                                </td>
+                                <td>@driver.Country</td>
+                                <td>@driver.DriverNumber</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    @if (totalNumberOfDrivers > 0)
+                    {
+                        <tr>
+                            <td colspan="3">
+                                <ul class="pagination">
+                                    <li class="page-item">
+                                        <a class="page-link" tabindex="-1" @onclick="@(() => Previous())">Previous</a>
+                                    </li>
+                                    @foreach (var pagina in Pages)
+                                    {
+                                        <li class="page-item @GetIsActive(pagina)"><a class="page-link" @onclick="@(() => HandleClick(pagina))">@pagina.PageNumber</a></li>
+                                    }
+                                    <li class="page-item">
+                                        <a class="page-link" @onclick="@(() => Next())">Next</a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    }
+                </tfoot>
+            </table>
+        </PortletBody>
+    </Portlet>
+</div>
+<div class="row">
+    <Portlet>
+        <PortletHead>Extra opties</PortletHead>
+        <PortletBody>
+            <NavLink class="nav-link" href="Drivers/Add">
+                Add Driver
+            </NavLink>
+
+            <NavLink class="nav-link" href="Drivers/BulkAdd">
+                Bulk Add
+            </NavLink>
+        </PortletBody>
+    </Portlet>
+</div>
+
+
+
+@code {
+
+    private const int PageSize = 20;
+    private int CurrentPage = 1;
+
+    ICollection<Driver> drivers = null;
+    ICollection<PagingItem> Pages = null;
+    private int totalNumberOfDrivers = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        totalNumberOfDrivers = await DriverClient.GetNumberOfDriversAsync();
+        Pages = new List<PagingItem>();
+        for(int i = 1; i <= GetNumberOfPages(); i++)
+        {
+            Pages.Add(new PagingItem
+            {
+                PageNumber = i
+            });
+        }
+        drivers = await DriverClient.PageDriversAsync(CurrentPage-1, PageSize);
+    }
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+
+    private int GetNumberOfPages()
+    {
+        return Convert.ToInt32(Math.Ceiling( (double)(totalNumberOfDrivers / PageSize)));
+    }
+
+    private async Task HandleClick(PagingItem page)
+    {
+        CurrentPage = page.PageNumber;
+        drivers = await DriverClient.PageDriversAsync(CurrentPage - 1, PageSize);
+    }
+
+    private async Task Previous()
+    {
+        if(CurrentPage <= 1) return;
+        var previousItem = new PagingItem
+        {
+            PageNumber = CurrentPage - 1
+        };
+        await HandleClick(previousItem);
+    }
+
+    private async Task Next()
+    {
+        if (CurrentPage >= GetNumberOfPages()) return;
+        var nextItem = new PagingItem
+        {
+            PageNumber = CurrentPage + 1
+        };
+        await HandleClick(nextItem);
+    }
+
+    private string GetIsActive(PagingItem paging)
+    {
+        return paging.PageNumber == CurrentPage ? "active" : string.Empty;
+    }
+}

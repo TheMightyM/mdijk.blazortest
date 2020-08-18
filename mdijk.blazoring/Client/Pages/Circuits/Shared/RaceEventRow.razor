@@ -1,0 +1,107 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Statistics
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@using mdijk.blazoring.Shared.Models.CircuitEvents
+@using mdijk.blazoring.Client.Pages.Circuits.Shared
+@inject EventResultClient EventResultClient
+
+<tr>
+    <td>
+        <a href="/Results/Overall/@RaceEventId/@RaceEventSeasonYear/@RaceEventName" class="nav-link">
+            @RaceEventSeasonYear @RaceEventName
+        </a>
+    </td>
+    @if (HasRaceBeenRun)
+    {
+        <td>
+            @if (FirstPlaceDriver == null)
+            {
+                <span>loading...</span>
+            }
+            else
+            {
+                <a href="@CreateNavLink(FirstPlaceDriver)" class="nav-link">
+                    @DriverFormatter.Format(FirstPlaceDriver)
+                </a>
+            }
+        </td>
+        <td>
+            @if (SecondPlaceDriver == null)
+            {
+                <span>loading...</span>
+            }
+            else
+            {
+                <a href="@CreateNavLink(SecondPlaceDriver)" class="nav-link">
+                    @DriverFormatter.Format(SecondPlaceDriver)
+                </a>
+            }
+        </td>
+        <td>
+            @if (ThirdPlaceDriver == null)
+            {
+                <span>loading...</span>
+            }
+            else
+            {
+                <a href="@CreateNavLink(ThirdPlaceDriver)" class="nav-link">
+                    @DriverFormatter.Format(ThirdPlaceDriver)
+                </a>
+            }
+        </td>
+    }
+    else
+    {
+        <td colspan="3">
+            No results for race.
+        </td>
+    }
+</tr>
+
+
+@code {
+    [Parameter]
+    public int RaceEventId { get; set; }
+
+    [Parameter]
+    public string RaceEventName { get; set; }
+
+    [Parameter]
+    public int RaceEventSeasonId { get; set; }
+
+    [Parameter]
+    public int RaceEventSeasonYear { get; set; }
+
+    private Driver FirstPlaceDriver = null;
+    private Driver SecondPlaceDriver = null;
+    private Driver ThirdPlaceDriver = null;
+
+    private bool HasRaceBeenRun = true;
+
+
+    private ICollection<EventResult> Results = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Results = await EventResultClient.GetResultsForEventAsync(RaceEventId, RaceEventName);
+        //Results = await Http.GetFromJsonAsync<ICollection<EventResult>>($"EventResult/getresultsforevent/{RaceEventId}/{RaceEventName}");
+
+        if (Results == null || !Results.Any())
+        {
+            HasRaceBeenRun = false;
+        }
+        else
+        {
+            FirstPlaceDriver = Results.First(x => x.FinishingPosition == 1).DriverEntry.Driver;
+            SecondPlaceDriver = Results.First(x => x.FinishingPosition == 2).DriverEntry.Driver;
+            ThirdPlaceDriver = Results.First(x => x.FinishingPosition == 3).DriverEntry.Driver;
+        }
+    }
+
+    private string CreateNavLink(Driver driver)
+    {
+        return $"Drivers/Info/{driver.DriverId}/{driver.FirstName}_{driver.LastName}";
+    }
+
+}

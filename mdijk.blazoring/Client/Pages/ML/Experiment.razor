@@ -1,0 +1,203 @@
+﻿@page "/ML/Expirement"
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.ML
+@using mdijk.blazoring.Client.Pages.ML.Components
+
+@inject MachinedLearningClient MLClient
+@inject LaptimeClient LaptimeClient
+
+<div class="row">
+    <Portlet>
+        <PortletHead>Extra Opties</PortletHead>
+        <PortletBody>
+            <a href="ML/RacePrediction">Full race weird prediction thingies</a>
+        </PortletBody>
+    </Portlet>
+</div>
+@if (ShowDDE)
+{
+    <div class="row">
+        <Portlet>
+            <PortletHead>
+                Data test
+            </PortletHead>
+            <PortletBody>
+                @if (TestLaptime != null)
+                {
+                    <DDE @bind-Laptime="@TestLaptime" />
+                }
+                <div class="col-4">
+                    <button @onclick="@(()=> ClickerMagic())">In this page click</button>
+                </div>
+            </PortletBody>
+        </Portlet>
+    </div>
+
+    <div class="row">
+        <Portlet>
+            <PortletHead>
+                Data test
+            </PortletHead>
+            <PortletBody>
+                @if (TestLaptime != null)
+                {
+                    <DDE @bind-Laptime="@TestLaptime" />
+                }
+            </PortletBody>
+        </Portlet>
+    </div>
+
+
+    <div class="row">
+        <Portlet>
+            <PortletHead>
+                Data test
+            </PortletHead>
+            <PortletBody>
+                @if (TestLaptime != null)
+                {
+                    @TimeSpan.FromMilliseconds(TestLaptime.Milliseconds).ToString(@"mm\:ss\:fff")
+                }
+            </PortletBody>
+        </Portlet>
+    </div>
+}
+
+
+<div class="row">
+    <Portlet>
+        <PortletHead>Pedict Driver Times!</PortletHead>
+        <PortletBody>
+            <EditForm model="@mlRequest" OnValidSubmit="HandleSubmit" class="kt-form kt-form--label-right">
+
+                <div class="form-group form-row">
+                    <label for="inputDrivernumber" class="col-sm-2 col-form-label">Season</label>
+                    <div class=" col-md-4">
+                        <InputNumber id="inputSeasonYear" @bind-Value="mlRequest.SeasonYear" Placeholder="Year" class="form-control" />
+                    </div>
+                </div>
+
+
+                <div class="form-group form-row">
+                    <label for="inputDrivernumber" class="col-sm-2 col-form-label">Circuit Id</label>
+                    <div class=" col-md-4">
+                        <InputNumber id="inputCircuitId" @bind-Value="mlRequest.CircuitId" Placeholder="CircuitId" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group form-row">
+                    <label for="inputDrivernumber" class="col-sm-2 col-form-label">DriverId</label>
+                    <div class=" col-md-4">
+                        <InputNumber id="inputDriverId" @bind-Value="mlRequest.DriverId" Placeholder="DriverId" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group form-row">
+                    <label for="inputDrivernumber" class="col-sm-2 col-form-label">LapNumber</label>
+                    <div class=" col-md-4">
+                        <InputNumber id="inputLapNumber" @bind-Value="mlRequest.LapNumber" Placeholder="LapNumber" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group form-row">
+                    <label for="inputDrivernumber" class="col-sm-2 col-form-label">CurrentPosition</label>
+                    <div class=" col-md-4">
+                        <InputNumber id="inputCurrentPosition" @bind-Value="mlRequest.CurrentPosition" Placeholder="CurrentPosition" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-10">
+
+                        <button type="submit" class="btn btn-primary">PREDICT!</button>
+                    </div>
+                </div>
+            </EditForm>
+
+            @if (loading == false && predictedMilliseconds != null)
+            {
+                <div class="row">
+                    <table class="table">
+                        <tr>
+                            <td>Predicted</td>
+                            <td>@predictedMilliseconds</td>
+                        </tr>
+                        @if (actualMilliseconds != null && actualMilliseconds.Any())
+                        {
+                            <tr>
+                                <td rowspan="@actualMilliseconds.Count">Actual</td>
+                                <td>@actualMilliseconds[0]</td>
+                            </tr>
+
+                            for (int i = 1; i < actualMilliseconds.Count; i++)
+                            {
+                                <tr><td>@actualMilliseconds[i]</td></tr>
+                            }
+                        }
+                    </table>
+                </div>
+            }
+        </PortletBody>
+    </Portlet>
+</div>
+
+@code {
+
+    public MLRequest mlRequest = new MLRequest();
+
+
+    private bool loading = false;
+
+    private string predictedMilliseconds = null;
+    private List<string> actualMilliseconds = null;
+
+    private Laptime TestLaptime = null;
+
+    private bool ShowDDE = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.FromResult(true);
+        TestLaptime = new Laptime
+        {
+            CurrentPosition = 1,
+            LapNumber = 1,
+            Milliseconds = 80000
+        };
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        loading = true;
+        actualMilliseconds = null;
+        predictedMilliseconds = null;
+
+        var mlResponse = await MLClient.PredictLaptimeAsync(mlRequest);
+        var actualLaptimes = await LaptimeClient.GetSpecificLaptimeAsync(mlRequest.SeasonYear,
+            mlRequest.CircuitId,
+            mlRequest.DriverId,
+            mlRequest.LapNumber,
+            mlRequest.CurrentPosition);
+
+        predictedMilliseconds = new TimeSpan(0, 0, 0, 0, mlResponse.PredictedMilliseconds).ToString(@"mm\:ss\:fff");
+        if (actualLaptimes.Any())
+        {
+            actualMilliseconds = new List<string>();
+            foreach (var alt in actualLaptimes)
+            {
+                actualMilliseconds.Add(new TimeSpan(0, 0, 0, 0, alt.Milliseconds).ToString(@"mm\:ss\:fff"));
+
+            }
+        }
+
+        loading = false;
+    }
+
+
+    private void ClickerMagic()
+    {
+        TestLaptime.Milliseconds += 10000;
+    }
+}

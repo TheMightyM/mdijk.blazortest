@@ -1,0 +1,64 @@
+﻿@page "/Circuits/Overview"
+@using mdijk.blazoring.Shared.Models
+@inject CircuitClient CircuitClient
+
+<div class="row">
+    <div class="col-md-12 col-lg-12 col-xl-12">
+        <div class="text-center">
+            <h1 class="display-4">All Circuits</h1>
+        </div>
+
+        <div class="order-lg-1 order-xl-3">
+            <div class="kt-portlet">
+
+                <div class="kt-portlet__head">
+                    <div class="kt-portlet__head-label">
+                        <h3 class="kt-portlet__head-title">Circuits</h3>
+                    </div>
+                </div>
+
+
+                <div class="kt-portlet__body" id="dCircuits">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Name</th>
+                            <th>Nationality</th>
+                        </tr>
+                        @if (circuits == null)
+                        {
+                            <LoadingTwoColumns />
+                        }
+                        else
+                        {
+                            @foreach (var circuit in circuits)
+                            {
+                                <tr>
+                                    <td>
+                                        <a href="circuits/details/@circuit.CircuitId/@circuit.CircuitName">
+                                            @circuit.CircuitName
+                                        </a>
+                                    </td>
+                                    <td>@circuit.Country</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <NavLink class="nav-link" href="Circuits/BulkAdd">
+            Bulk Add
+        </NavLink>
+    </div>
+</div>
+
+@code {
+
+    ICollection<Circuit> circuits = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        circuits = await CircuitClient.GetAllCircuitsAsync();
+    }
+}

@@ -1,0 +1,70 @@
+﻿@page "/Teams/Overview"
+@using mdijk.blazoring.Shared.Models
+@inject TeamClient TeamClient
+
+<div class="col-md-12 col-lg-12 col-xl-12">
+    <div class="text-center">
+        <h1 class="display-4">All Teams</h1>
+    </div>
+
+    <div class="order-lg-1 order-xl-3">
+        <div class="kt-portlet">
+
+            <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                    <h3 class="kt-portlet__head-title">Teams</h3>
+                </div>
+            </div>
+
+
+            <div class="kt-portlet__body" id="dTeams">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Name</th>
+                        <th>Nationality</th>
+                    </tr>
+                    @if (isLoading)
+                    {
+                        <LoadingTwoColumns />
+                    }
+                    else
+                    {
+                        @foreach (var team in teams)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@CreateNavLink(team)">
+                                        @team.TeamName
+                                    </a>
+                                </td>
+                                <td>@team.Country</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <NavLink class="nav-link" href="Teams/BulkAdd">
+        Bulk Add
+    </NavLink>
+</div>
+
+
+@code {
+
+    ICollection<Team> teams = null;
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        teams = await TeamClient.GetAllTeamsAsync();
+        isLoading = false;
+    }
+
+    private string CreateNavLink(Team team)
+    {
+        return $"Teams/Details/{team.TeamId}/{team.TeamName}";
+    }
+}

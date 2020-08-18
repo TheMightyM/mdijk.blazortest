@@ -1,0 +1,93 @@
+﻿<div class="kt-aside__brand kt-grid__item " id="kt_aside_brand">
+    <div class="kt-aside__brand-logo">
+        <a asp-controller="home" asp-action="index">
+            <h3>Blazor Testor</h3>
+        </a>
+    </div>
+    <div class="kt-aside__brand-tools">
+        <button class="kt-aside__brand-aside-toggler kt-aside__brand-aside-toggler--left" id="kt_aside_toggler"><span></span></button>
+    </div>
+</div>
+
+<div class="kt-aside-menu-wrapper kt-grid__item kt-grid__item--fluid" id="kt_aside_menu_wrapper">
+    <div id="kt_aside_menu" class="kt-aside-menu " data-ktmenu-vertical="1" data-ktmenu-scroll="1" data-ktmenu-dropdown-timeout="500">
+        <ul class="kt-menu__nav ">
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="" Match="NavLinkMatch.All">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Home</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="/Standings" Match="NavLinkMatch.All">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Current Standings</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="Drivers/Overview">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Drivers</span>
+                </NavLink>
+            </li>
+
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="Teams/Overview">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Teams</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="Engines/Overview">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Engines</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="Seasons/Overview">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Seasons</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="Circuits/Overview">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">Circuits</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="ML/Expirement">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">ML</span>
+                </NavLink>
+            </li>
+
+            <li class="kt-menu__item " aria-haspopup="true">
+                <NavLink class="kt-menu__link" href="ML/RacePrediction">
+                    <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
+                    <span class="kt-menu__link-text">ML-FullRace</span>
+                </NavLink>
+            </li>
+
+        </ul>
+    </div>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

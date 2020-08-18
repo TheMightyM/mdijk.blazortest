@@ -1,0 +1,61 @@
+﻿@page "/Circuits/Details/{CircuitId}/{CircuitName}"
+
+@using mdijk.blazoring.Shared
+@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.Statistics
+@using mdijk.blazoring.Client.Pages.Teams.Shared
+@using mdijk.blazoring.Shared.Models.CircuitEvents
+@using mdijk.blazoring.Client.Pages.Circuits.Shared 
+@inject CircuitClient CircuitClient
+
+<Portlet>
+    <PortletHead>Historical Records: Races at this circuit</PortletHead>
+    <PortletBody>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Event name</th>
+                    <th>1st</th>
+                    <th>2nd</th>
+                    <th>3rd</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(RaceEvents == null)
+                {
+                    <LoadingColumns ColumnCount="4"/>
+                }
+                else
+                {
+                    foreach(var re in RaceEvents.OrderByDescending(res => res.SeasonYear))
+                    {
+                        <RaceEventRow 
+                                      RaceEventId="@re.RaceEventId" 
+                                      RaceEventName="@re.RaceEventName"
+                                      RaceEventSeasonId="@re.SeasonId"
+                                      RaceEventSeasonYear="@re.SeasonYear"
+                                      />
+                    }
+                }
+            </tbody>
+        </table>
+    </PortletBody>
+</Portlet>
+
+
+@code {
+
+    [Parameter]
+    public string CircuitId { get; set; }
+
+    [Parameter]
+    public string CircuitName { get; set; }
+
+    private ICollection<HistoricalRaceEvent> RaceEvents = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        RaceEvents = await CircuitClient.GetCircuitHistoryEventAsync(Convert.ToInt32(CircuitId));
+        //RaceEvents = await Http.GetFromJsonAsync<ICollection<HistoricalRaceEvent>>($"circuit/history/{CircuitId}");
+    }
+}

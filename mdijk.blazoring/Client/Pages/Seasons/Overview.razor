@@ -1,0 +1,86 @@
+﻿@page "/Seasons/Overview"
+@using mdijk.blazoring.Shared.Models
+@inject SeasonClient SeasonClient
+
+<div class="col-md-12 col-lg-12 col-xl-12">
+    <div class="text-center">
+        <h1 class="display-4">All Seasons</h1>
+    </div>
+
+    <div class="order-lg-1 order-xl-3">
+        <div class="kt-portlet">
+
+            <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                    <h3 class="kt-portlet__head-title">Seasons</h3>
+                </div>
+            </div>
+
+
+            <div class="kt-portlet__body" id="dSeasons">
+                <table class="table table-striped">
+
+                    @if (seasons == null)
+                    {
+                        <LoadingTwoColumns />
+                    }
+                    else
+                    {
+                        if (seasons.Count > 5)
+                        {
+
+                            @:<tr>
+                                var celCount = 0;
+                                var maxCells = 7;
+                                foreach (var season in seasons)
+                                {
+                                    if (celCount == maxCells)
+                                    {
+                                        celCount = 0;
+                                    @:</tr><tr>
+                                    }
+                                    celCount++;
+                                    <td>
+                                        <a href="/Seasons/Detail/@season.SeasonId/@season.SeasonYear">
+                                            @season.SeasonYear
+                                        </a>
+                                    </td>
+                                }
+                            @:</tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <th>Year</th>
+                            </tr>
+                            @foreach (var season in seasons)
+                            {
+                                <tr>
+                                    <td>
+                                        <a href="/Seasons/Detail/@season.SeasonId/@season.SeasonYear">
+                                            @season.SeasonYear
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <NavLink class="nav-link" href="Seasons/Add">
+        Add Season
+    </NavLink>
+</div>
+
+@code {
+
+    ICollection<Season> seasons = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        seasons = await SeasonClient.GetAllSeasonsAsync();
+    }
+}

@@ -1,0 +1,56 @@
+﻿@inject IJSRuntime JSRuntime
+
+@code {
+    public int EventId { get; set; }
+
+    public int DriverId { get; set; }
+    public string EventName { get; set; }
+
+    public string ElementId { get; set; }
+    public int SeasonYear { get; set; }
+
+
+    [JSInvokable]
+    public Task<string> CreateElementId()
+    {
+        return Task.FromResult($"aEvent{EventId}");
+    }
+
+    [JSInvokable]
+    public async Task<string> GetEventInformation()
+    {
+        try
+        {
+            // super lelijk, maar IoC / depenency injection werkt niet.
+            var erClient = new EventResultClient(new HttpClient { BaseAddress = Constants.BaseAddress });
+
+            var Results = await erClient.GetResultsForEventAsync(EventId, $"{EventId}");
+
+            if (Results == null || !Results.Any())
+            {
+                return "Race not run yet. so this should never be here!";
+            }
+
+            var FirstPlaceDriver = Results.First(x => x.FinishingPosition == 1).DriverEntry.Driver;
+            var SecondPlaceDriver = Results.First(x => x.FinishingPosition == 2).DriverEntry.Driver;
+            var ThirdPlaceDriver = Results.First(x => x.FinishingPosition == 3).DriverEntry.Driver;
+
+            var html = $@"
+<div class='row'>
+    <strong>The {SeasonYear} {EventName}</strong>
+</div>
+<div class='row'><strong>#1.&nbsp;</strong>{mdijk.blazoring.Shared.DriverFormatter.Format(FirstPlaceDriver)}</div>
+<div class='row'><strong>#2.&nbsp;</strong>{mdijk.blazoring.Shared.DriverFormatter.Format(SecondPlaceDriver)}</div>
+<div class='row'><strong>#3.&nbsp;</strong>{mdijk.blazoring.Shared.DriverFormatter.Format(ThirdPlaceDriver)}</div>
+";
+
+            return html;
+        }
+        catch (Exception ex)
+        {
+            return $@"<div class='row'>{ex.Message}</div>
+        <div class='row'>{ex.StackTrace}</div>
+        ";
+        }
+    }
+}

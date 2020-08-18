@@ -1,0 +1,162 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Client.Pages.Seasons.RaceEvents
+@using mdijk.blazoring.Shared.Models.SeasonResults
+@using ChartJs.Blazor;
+@using ChartJs.Blazor.Charts
+@using ChartJs.Blazor.ChartJS.LineChart
+@using ChartJs.Blazor.ChartJS.Common
+@using ChartJs.Blazor.ChartJS.PieChart
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.Util
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Enums
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@inject SeasonClient SeasonClient
+
+<h3>SeasonTop10Finish</h3>
+
+@if (_lineConfig != null)
+{
+    <ChartJsLineChart @ref="_linechartJs" Config="@_lineConfig" Width="600" Height="300" />
+}
+@code {
+    [Parameter]
+    public int SeasonId { get; set; }
+
+    private LineConfig _lineConfig;
+    private ChartJsLineChart _linechartJs;
+
+    private SeasonResultsModel SeasonResults = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SeasonResults = await SeasonClient.GetSeasonResultsAsync(SeasonId);
+
+        if (SeasonResults == null) return;
+        // pak de coureur die de eerste race als eerste gefinished is.
+        try
+        {
+            GenerateGraph();
+        }
+        catch
+        {
+            // oops!
+        }
+    }
+
+    private void GenerateGraph()
+    {
+
+        _lineConfig = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Finishing positions"
+                },
+                Responsive = true,
+                Hover = new LineOptionsHover
+                {
+                    Intersect = true,
+                    Mode = InteractionMode.Y
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = false
+                },
+                ShowLines = true,
+                Scales = new Scales
+                {
+
+                    xAxes = new List<CartesianAxis>
+{
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Race Number"
+                            },
+                            GridLines = new GridLines
+                            {
+                                Display = false
+                            },
+                            Ticks = new LinearCartesianTicks
+                            {
+                                Min = 1,
+                                Max = SeasonResults.RaceEvents.Count,
+                            }
+                        }
+                    },
+                    yAxes = new List<CartesianAxis>
+{
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Finishing Position"
+                            },
+                            Ticks = new LinearCartesianTicks
+                            {
+                                Min = 1,
+                                Max = SeasonResults.RaceEvents.Max(x => x.Results.Count)
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var driversBadly = SeasonResults.RaceEvents
+            .Where(x => x.Results != null && x.Results.Any())
+            .SelectMany(x => x.Results.Select(y => y.DriverEntry.Driver))
+            .Distinct()
+            ;//.SelectMany<DriverEntry>(y => y.DriverEntry);
+
+        var drivers = new Dictionary<int, Driver>();
+        foreach (var driver in driversBadly)
+        {
+            if (drivers.ContainsKey(driver.DriverId)) continue;
+            drivers.Add(driver.DriverId, driver);
+        }
+
+
+        //foreach (var result in SeasonResults.RaceEvents.First().Results)
+        foreach (var driver in drivers.Values)
+        {
+            //    var driver = result.DriverEntry.Driver;
+            var placings = SeasonResults.RaceEvents
+                .OrderBy(re => re.SequenceNumber)
+                .Select(re => re.Results
+                    .Where(re => re.DriverEntry.Driver.DriverId == driver.DriverId)
+                    .Select(er => new Point(re.SequenceNumber, er.FinishingPosition)).FirstOrDefault())
+                .ToList();
+
+            var colorString = GetDriverColor(driver);
+            var _dsp = new LineDataset<Point>
+            {
+                BackgroundColor = colorString,
+                BorderColor = colorString,
+                Label = $"{driver.FirstName} {driver.LastName}",
+                Fill = false,
+                BorderWidth = 1,
+                PointRadius = 3,
+                PointBorderWidth = 1,
+
+            };
+            _dsp.AddRange(placings);
+
+
+            _lineConfig.Data.Datasets.Add(_dsp);
+        }
+    }
+
+    private string GetDriverColor(Driver driver)
+    {
+        var bytes = mdijk.blazoring.Shared.DriverColourCreator.CreateHexFromName($"{driver.FirstName} {driver.LastName}");
+
+        return ColorUtil.ColorHexString(bytes.Item1, bytes.Item2, bytes.Item3);
+    }
+}

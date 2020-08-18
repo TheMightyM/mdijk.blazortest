@@ -1,0 +1,26 @@
+﻿@using mdijk.blazoring.Shared.Models
+
+<div class="col-4">
+    @TimeSpan.FromMilliseconds(Laptime.Milliseconds).ToString(@"mm\:ss\:fff")
+</div>
+<div class="col-4">
+    <button @onclick="@(()=> ClickMe())">In Component click</button>
+</div>
+
+@code {
+
+    [Parameter]
+    public Laptime Laptime { get; set; }
+
+
+    [Parameter]
+    public EventCallback<Laptime> LaptimeChanged { get; set; }
+
+    private async Task ClickMe()
+    {
+        Laptime.Milliseconds += 10000;
+        await LaptimeChanged.InvokeAsync(Laptime);
+    }
+
+
+}

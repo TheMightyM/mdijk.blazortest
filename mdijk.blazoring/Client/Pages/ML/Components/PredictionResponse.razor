@@ -1,0 +1,98 @@
+﻿@using mdijk.blazoring.Shared.Models
+@using mdijk.blazoring.Shared.ML
+@using mdijk.blazoring.Client.StateMachine.MLEXP
+
+@inject MachinedLearningClient MLClient
+
+@if(loading)
+{
+    <div>Calculating... please wait.</div>
+}
+else
+{
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    @foreach (var driver in _driverCircuitResponse.Predictions)
+                    {
+                        <th>@StateMachine.SeasonsDrivers[driver.DriverId].FirstName 
+                            @StateMachine.SeasonsDrivers[driver.DriverId].LastName</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int lapCounter = 1; lapCounter <= _driverCircuitResponse.RaceLaps; lapCounter++)
+                {
+                    <tr>
+                        <td>@lapCounter</td>
+                        @for (int driverCounter = 0; driverCounter < _driverCircuitResponse.Predictions.Count; driverCounter++)
+                        {
+                            <td>
+                                @FormatTime(_driverCircuitResponse.Predictions.ElementAt(driverCounter).Laptimes.First(l => l.LapNumber == lapCounter).PredictedLapTime)
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Final racetime</td>
+                    @for (int driverCounter = 0; driverCounter < _driverCircuitResponse.Predictions.Count; driverCounter++)
+                    {
+                        <td>
+                            @CalculateTotalRaceTime(_driverCircuitResponse.Predictions.ElementAt(driverCounter).Laptimes)
+                        </td>
+                    }
+                </tr>
+                <tr>
+                    <td>Actually</td>
+                    @for (int driverCounter = 0; driverCounter < _driverCircuitResponse.Predictions.Count; driverCounter++)
+                    {
+                        <td>
+                            @CalculateTotalRaceTime(_driverCircuitResponse.Predictions.ElementAt(driverCounter).ActualLaptimes)
+                        </td>
+                    }
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public MLStateMachine StateMachine { get; set; }
+
+    [Parameter]
+    public EventCallback<MLStateMachine> StateMachineChanged { get; set; }
+
+    private MLDriverCircuitResponse _driverCircuitResponse = null;
+
+    private bool loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+
+        _driverCircuitResponse = await MLClient.PredictFullRaceAsync(StateMachine.DriverCircuitRequest);
+
+        loading = false;
+    }
+
+    private string FormatTime(int milliseconds)
+    {
+        var fromMs = TimeSpan.FromMilliseconds(milliseconds);
+        if (fromMs.TotalHours > 1)
+        {
+            return fromMs.ToString(@"hh\:mm\:ss\:fff");
+        }
+        return fromMs.ToString(@"mm\:ss\:fff");
+    }
+
+    private string CalculateTotalRaceTime(ICollection<MLDriverPredictionLap> predictions)
+    {
+        var total = predictions.Sum(x => x.PredictedLapTime);
+        return FormatTime(total);
+    }
+}

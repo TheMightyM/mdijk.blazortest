@@ -15,3 +15,5 @@ I have a personal licence for the theme used in this application, but I do not f
 # Coding and stuff
 Everything in this project is a mix of Dutch and English. All real code (functions, methods, variables, stuff like that) should be in English, but some comments will be in Dutch. Not really worthwhile comments. Also, I try my best with English, but I am dyslectic so there might be some wierd texts in here on occasion.
 
+# Machine Learning
+There is a terrible attempt at trying to use ML.NET to predict the laptimes of drivers for a race. Does not produce any meaningful data. The only thing I learned from it: I most certainly do not have the required data and the required skills to do this.
